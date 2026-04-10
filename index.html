@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --blue-900: #0f3d91;
+            --blue-700: #2458c6;
+            --blue-100: #eaf2ff;
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-500: #64748b;
+            --slate-200: #e2e8f0;
+            --slate-100: #f8fafc;
+            --card-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--slate-100);
+            color: var(--slate-900);
+            line-height: 1.65;
+        }
+
+        .container {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 0 24px 24px;
+        }
+
+        header {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            background:
+                radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.16), transparent 28%),
+                radial-gradient(circle at 82% 14%, rgba(154, 205, 255, 0.14), transparent 24%),
+                linear-gradient(135deg, #061634 0%, #0d2f68 40%, #1e53be 100%);
+            color: #fff;
+            border-radius: 0;
+            padding: 78px 36px 84px;
+            min-height: 460px;
+            box-shadow: 0 18px 44px rgba(36, 88, 198, 0.24);
+            margin-bottom: 28px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            margin-left: calc(50% - 50vw);
+            margin-right: calc(50% - 50vw);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1120px;
+            padding: 28px 34px;
+        }
+
+        .hero-content::before {
+            content: "";
+            position: absolute;
+            inset: -14px;
+            z-index: -1;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(4, 13, 33, 0.08), rgba(7, 18, 44, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 20px 50px rgba(6, 15, 40, 0.08);
+        }
+
+        h1 {
+            font-size: clamp(3.5rem, 7vw, 5.4rem);
+            line-height: 1.02;
+            margin-bottom: 16px;
+            letter-spacing: -0.04em;
+            font-weight: 800;
+            text-wrap: balance;
+            text-shadow: 0 10px 28px rgba(8, 15, 40, 0.35);
+        }
+
+        .subtitle {
+            font-size: clamp(1.18rem, 2vw, 1.45rem);
+            opacity: 0.95;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .authors {
+            font-size: clamp(1.04rem, 1.45vw, 1.25rem);
+            opacity: 0.96;
+            margin-bottom: 12px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.9;
+        }
+
+        .authors a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: opacity 0.2s ease;
+        }
+
+        .authors a:hover {
+            border-bottom-color: rgba(255, 255, 255, 0.92);
+            opacity: 1;
+        }
+
+        .affiliations {
+            font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+            opacity: 0.88;
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        .author-note {
+            font-size: 0.95rem;
+            opacity: 0.82;
+            margin-top: 10px;
+            max-width: 980px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .links {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            justify-content: center;
+        }
+
+        .links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--blue-900);
+            background: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 999px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+        }
+
+        .links a::before {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            font-size: 1rem;
+        }
+
+        .links a.paper-link::before {
+            content: "📄";
+        }
+
+        .links a.github-link::before {
+            content: "💻";
+        }
+
+        .hero-scene {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.92;
+        }
+
+        .hero-scene::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 16% 26%, rgba(255,255,255,0.12), transparent 20%),
+                radial-gradient(circle at 82% 24%, rgba(120, 192, 255, 0.12), transparent 18%),
+                linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0));
+            z-index: 1;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: auto 6% 8% 6%;
+            height: 170px;
+            background:
+                linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 34px 34px;
+            transform: perspective(1000px) rotateX(72deg);
+            transform-origin: center top;
+            opacity: 0.34;
+            z-index: 1;
+        }
+
+        .hero-fade {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background:
+                linear-gradient(to bottom, rgba(6, 22, 52, 0.06), rgba(6, 22, 52, 0.16)),
+                radial-gradient(ellipse at center 82%, rgba(4, 13, 33, 0.18), transparent 66%);
+        }
+
+        .scene-glow {
+            position: absolute;
+            width: var(--w);
+            height: var(--h);
+            left: var(--x);
+            top: var(--y);
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            background: radial-gradient(circle at center, rgba(122, 186, 255, 0.18), rgba(122, 186, 255, 0.02) 56%, transparent 72%);
+            filter: blur(18px);
+            animation: glow-breathe var(--glowDur, 4.2s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            z-index: 0;
+        }
+
+        .scene-block {
+            --size: 66px;
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            width: calc(var(--size) * var(--scale, 1));
+            height: calc(var(--size) * 0.58 * var(--scale, 1));
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(198,219,255,0.98));
+            clip-path: polygon(50% 0%, 100% 26%, 50% 52%, 0% 26%);
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            filter: drop-shadow(0 18px 26px rgba(6, 16, 38, 0.16));
+            animation:
+                block-float var(--dur, 4.8s) ease-in-out infinite,
+                block-shift var(--shadowDur, 5.8s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s), var(--delay, 0s);
+            z-index: 0;
+        }
+
+        .scene-block::before,
+        .scene-block::after {
+            content: "";
+            position: absolute;
+            top: 26%;
+            height: 62%;
+        }
+
+        .scene-block::before {
+            left: 0;
+            width: 50%;
+            background: linear-gradient(180deg, rgba(164, 193, 255, 0.92), rgba(89, 129, 225, 0.9));
+            clip-path: polygon(100% 0, 100% 100%, 0 74%, 0 24%);
+        }
+
+        .scene-block::after {
+            right: 0;
+            width: 50%;
+            background: linear-gradient(180deg, rgba(115, 156, 244, 0.94), rgba(39, 85, 188, 0.92));
+            clip-path: polygon(0 0, 100% 24%, 100% 74%, 0 100%);
+        }
+
+        .scene-block.accent {
+            background: linear-gradient(135deg, rgba(255, 232, 198, 0.96), rgba(255, 206, 126, 0.98));
+        }
+
+        .scene-block.accent::before {
+            background: linear-gradient(180deg, rgba(255, 188, 107, 0.94), rgba(237, 136, 43, 0.9));
+        }
+
+        .scene-block.accent::after {
+            background: linear-gradient(180deg, rgba(255, 161, 64, 0.96), rgba(218, 106, 14, 0.92));
+        }
+
+        .scene-block.teal {
+            background: linear-gradient(135deg, rgba(214, 255, 251, 0.94), rgba(156, 244, 232, 0.98));
+        }
+
+        .scene-block.teal::before {
+            background: linear-gradient(180deg, rgba(99, 225, 206, 0.94), rgba(27, 171, 151, 0.9));
+        }
+
+        .scene-block.teal::after {
+            background: linear-gradient(180deg, rgba(56, 199, 183, 0.96), rgba(13, 134, 120, 0.92));
+        }
+
+        .scene-block.tiny {
+            --size: 48px;
+        }
+
+        .scene-block.large {
+            --size: 82px;
+        }
+
+        @keyframes block-float {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0px) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(calc(-1 * var(--float, 22px))) scale(var(--floatScale, 1.03));
+            }
+        }
+
+        @keyframes block-shift {
+            0%, 100% {
+                filter: drop-shadow(0 18px 26px rgba(6, 16, 38, 0.16));
+            }
+            50% {
+                filter: drop-shadow(0 28px 38px rgba(6, 16, 38, 0.24));
+            }
+        }
+
+        @keyframes glow-breathe {
+            0%, 100% {
+                opacity: 0.22;
+                transform: translate(-50%, -50%) scale(0.94);
+            }
+            50% {
+                opacity: 0.56;
+                transform: translate(-50%, -50%) scale(1.12);
+            }
+        }
+
+        nav {
+            position: sticky;
+            top: 16px;
+            z-index: 20;
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-radius: 999px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            padding: 10px 14px;
+            margin-bottom: 28px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        nav a {
+            display: block;
+            text-decoration: none;
+            color: var(--slate-700);
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        nav a.active,
+        nav a:hover {
+            background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+            color: #fff;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 24px;
+            padding: 36px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: var(--blue-900);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--blue-700);
+        }
+
+        .section h3 {
+            font-size: 1.35rem;
+            color: var(--blue-900);
+            margin-bottom: 14px;
+        }
+
+        .lead {
+            color: var(--slate-700);
+            margin-bottom: 24px;
+        }
+
+        .image-card {
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 18px;
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .image-card img {
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .caption {
+            color: var(--slate-500);
+            font-size: 0.92rem;
+            margin-top: 10px;
+        }
+
+        .overview-grid,
+        .summary-grid,
+        .app-grid {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .stats {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .stat-number {
+            font-size: 2.6rem;
+            line-height: 1;
+            font-weight: 800;
+            color: var(--blue-900);
+            margin-bottom: 10px;
+            letter-spacing: -0.04em;
+        }
+
+        .stat-label {
+            font-size: 0.98rem;
+            color: var(--slate-600, #475569);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .info-card,
+        .app-card,
+        .summary-card {
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 22px;
+        }
+
+        .info-card h4,
+        .app-card h4,
+        .summary-card h4 {
+            color: var(--blue-900);
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+        }
+
+        .summary-card {
+            text-align: center;
+        }
+
+        .app-card {
+            text-align: center;
+        }
+
+        .muted {
+            color: var(--slate-500);
+        }
+
+        .taxonomy-container {
+            display: flex;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .taxonomy-static {
+            margin-top: 24px;
+        }
+
+        .chart-section {
+            flex: 0 0 55%;
+            background: #f8fbff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 22px;
+            min-height: 620px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .methods-section {
+            flex: 1;
+            background: #f8fbff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 22px;
+            overflow-y: auto;
+            min-height: 620px;
+        }
+
+        .chart-container {
+            height: 100%;
+            min-height: 500px;
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 16px;
+            flex: 1;
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--blue-900);
+            margin-bottom: 16px;
+        }
+
+        .back-button {
+            border: none;
+            background: var(--blue-700);
+            color: #fff;
+            font-weight: 700;
+            padding: 10px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+
+        .method-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .method-item {
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.94rem;
+        }
+
+        .method-item a {
+            text-decoration: none;
+            color: var(--blue-700);
+            font-weight: 600;
+        }
+
+        .subsection-item {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid var(--slate-200);
+        }
+
+        .subsection-item:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .list-block {
+            margin-top: 16px;
+        }
+
+        .list-block ul {
+            margin-left: 20px;
+            color: var(--slate-700);
+        }
+
+        .list-block li {
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--blue-100);
+            color: var(--blue-900);
+            font-size: 0.84rem;
+            font-weight: 700;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 980px) {
+            h1 {
+                font-size: 2.7rem;
+            }
+
+            .taxonomy-container {
+                flex-direction: column;
+            }
+
+            .chart-section {
+                flex: 1 1 auto;
+            }
+
+            header {
+                min-height: 520px;
+                padding: 64px 24px 80px;
+            }
+
+            .authors,
+            .affiliations {
+                line-height: 1.7;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            }
+
+            .hero-content {
+                padding: 20px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="hero-scene" aria-hidden="true">
+                <div class="hero-grid"></div>
+                <div class="scene-glow" style="--x:12%; --y:72%; --w:150px; --h:100px; --delay:0.1s; --glowDur:3.4s;"></div>
+                <div class="scene-glow" style="--x:26%; --y:66%; --w:200px; --h:130px; --delay:0.7s; --glowDur:4.2s;"></div>
+                <div class="scene-glow" style="--x:50%; --y:60%; --w:280px; --h:180px; --delay:1.2s; --glowDur:4.8s;"></div>
+                <div class="scene-glow" style="--x:74%; --y:66%; --w:210px; --h:130px; --delay:0.9s; --glowDur:3.9s;"></div>
+                <div class="scene-glow" style="--x:88%; --y:72%; --w:150px; --h:100px; --delay:1.8s; --glowDur:4.1s;"></div>
+                <div class="scene-block tiny" style="--x:8%; --y:79%; --scale:0.8; --delay:0.1s; --dur:2.4s; --shadowDur:3.2s; --float:52px; --floatScale:1.07;"></div>
+                <div class="scene-block accent tiny" style="--x:13%; --y:74%; --scale:0.84; --delay:0.45s; --dur:3.1s; --shadowDur:3.8s; --float:40px; --floatScale:1.06;"></div>
+                <div class="scene-block" style="--x:19%; --y:77%; --scale:0.88; --delay:0.8s; --dur:2.8s; --shadowDur:3.5s; --float:58px; --floatScale:1.08;"></div>
+                <div class="scene-block accent" style="--x:24%; --y:71%; --scale:0.94; --delay:1.15s; --dur:3.6s; --shadowDur:4.4s; --float:44px; --floatScale:1.06;"></div>
+                <div class="scene-block teal large" style="--x:30%; --y:65%; --scale:1.04; --delay:1.55s; --dur:3.0s; --shadowDur:3.7s; --float:68px; --floatScale:1.09;"></div>
+                <div class="scene-block tiny" style="--x:37%; --y:78%; --scale:0.78; --delay:0.35s; --dur:2.6s; --shadowDur:3.3s; --float:42px; --floatScale:1.06;"></div>
+                <div class="scene-block accent" style="--x:43%; --y:72%; --scale:0.92; --delay:1.0s; --dur:3.4s; --shadowDur:4.1s; --float:56px; --floatScale:1.07;"></div>
+                <div class="scene-block large" style="--x:50%; --y:60%; --scale:1.22; --delay:1.45s; --dur:2.9s; --shadowDur:3.6s; --float:78px; --floatScale:1.1;"></div>
+                <div class="scene-block teal" style="--x:57%; --y:69%; --scale:0.92; --delay:1.9s; --dur:3.9s; --shadowDur:4.8s; --float:46px; --floatScale:1.06;"></div>
+                <div class="scene-block accent tiny" style="--x:63%; --y:76%; --scale:0.8; --delay:0.6s; --dur:2.3s; --shadowDur:3.1s; --float:60px; --floatScale:1.07;"></div>
+                <div class="scene-block large" style="--x:69%; --y:64%; --scale:1.08; --delay:1.3s; --dur:3.2s; --shadowDur:3.9s; --float:66px; --floatScale:1.08;"></div>
+                <div class="scene-block teal" style="--x:75%; --y:71%; --scale:0.9; --delay:1.75s; --dur:2.7s; --shadowDur:3.4s; --float:44px; --floatScale:1.06;"></div>
+                <div class="scene-block accent" style="--x:81%; --y:67%; --scale:0.96; --delay:1.1s; --dur:3.8s; --shadowDur:4.5s; --float:62px; --floatScale:1.07;"></div>
+                <div class="scene-block tiny" style="--x:87%; --y:78%; --scale:0.78; --delay:0.5s; --dur:2.5s; --shadowDur:3.2s; --float:40px; --floatScale:1.06;"></div>
+                <div class="scene-block teal tiny" style="--x:92%; --y:73%; --scale:0.82; --delay:1.6s; --dur:3.5s; --shadowDur:4.1s; --float:52px; --floatScale:1.07;"></div>
+                <div class="hero-fade"></div>
+            </div>
+            <div class="hero-content">
+                <h1>Feed-Forward 3D Scene Modeling</h1>
+                <p class="subtitle">A Problem-Driven Perspective</p>
+                <p class="authors">
+                    <a href="https://lhmd.top/" target="_blank" rel="noopener noreferrer">Weijie Wang</a><sup>1†</sup>,
+                    <a href="https://scholar.google.com/citations?user=oegbT6AAAAAJ" target="_blank" rel="noopener noreferrer">Qihang Cao</a><sup>2†</sup>,
+                    <a href="https://sensengao.github.io/" target="_blank" rel="noopener noreferrer">Sensen Gao</a><sup>2†</sup>,
+                    <a href="https://donydchen.github.io/" target="_blank" rel="noopener noreferrer">Donny Y. Chen</a><sup>3</sup>,
+                    <a href="https://haofeixu.github.io/" target="_blank" rel="noopener noreferrer">Haofei Xu</a><sup>4,5</sup>,
+                    <a href="https://eng.ox.ac.uk/people/chuanxia-zheng/" target="_blank" rel="noopener noreferrer">Chuanxia Zheng</a><sup>2</sup>,
+                    <a href="https://bianwenjing.github.io/" target="_blank" rel="noopener noreferrer">Wenjing Bian</a><sup>5</sup>,
+                    <a href="https://pengsongyou.github.io/" target="_blank" rel="noopener noreferrer">Songyou Peng</a><sup>4</sup>,
+                    <a href="https://personal.ntu.edu.sg/astjcham/" target="_blank" rel="noopener noreferrer">Tat-Jen Cham</a><sup>2</sup>,
+                    <a href="https://www.cvlibs.net/" target="_blank" rel="noopener noreferrer">Andreas Geiger</a><sup>5</sup>,
+                    <a href="https://jianfei-cai.github.io/" target="_blank" rel="noopener noreferrer">Jianfei Cai</a><sup>3</sup>,
+                    <a href="https://jwbian.net/" target="_blank" rel="noopener noreferrer">Jiawang Bian</a><sup>2*</sup>,
+                    <a href="https://bohanzhuang.github.io/" target="_blank" rel="noopener noreferrer">Bohan Zhuang</a><sup>1*</sup>
+                </p>
+                <p class="author-note">† Equal contribution &nbsp;&nbsp; * Corresponding authors</p>
+                <p class="affiliations">
+                    <sup>1</sup>Zhejiang University, China ·
+                    <sup>2</sup>Nanyang Technological University, Singapore ·
+                    <sup>3</sup>Monash University, Australia ·
+                    <sup>4</sup>ETH Zurich, Switzerland ·
+                    <sup>5</sup>University of Tübingen, Tübingen AI Center, Germany
+                </p>
+                <div class="links">
+                    <a class="paper-link" href="" target="_blank">Paper</a>
+                    <a class="github-link" href="https://github.com/ziplab/Awesome-Feed-Forward-3D" target="_blank">GitHub</a>
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#overview" class="nav-link active" data-page="overview">Overview</a></li>
+                <li><a href="#taxonomy" class="nav-link" data-page="taxonomy">Taxonomy</a></li>
+                <li><a href="#directions" class="nav-link" data-page="directions">Directions</a></li>
+                <li><a href="#benchmarks" class="nav-link" data-page="benchmarks">Datasets</a></li>
+                <li><a href="#applications" class="nav-link" data-page="applications">Applications</a></li>
+            </ul>
+        </nav>
+
+        <div id="overview" class="page active">
+            <div class="section">
+                <h2>Survey Statistics</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">200+</div>
+                        <div class="stat-label">Papers Reviewed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Main Directions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Dataset Groups</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">6+</div>
+                        <div class="stat-label">Application Areas</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Overview</h2>
+                <p class="lead">
+                    Feed-forward 3D scene modeling replaces per-scene optimization with direct inference from images.
+                    This project page summarizes the survey through a problem-driven taxonomy, covering feature enhancement,
+                    geometry-aware improvement, efficiency, augmentation, temporal modeling, datasets, and applications.
+                </p>
+                <div class="image-card">
+                    <img src="assets/overview.png" alt="Overview">
+                    <p class="caption">Overview of the survey scope and organization.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="taxonomy" class="page">
+            <div class="section">
+                <h2>Interactive Taxonomy</h2>
+                <p class="lead">
+                    The survey organizes feed-forward 3D methods by the core problems they solve rather than only by representation.
+                </p>
+
+                <div class="taxonomy-container">
+                    <div class="chart-section">
+                        <button id="backButton" class="back-button" style="display: none;">← Back</button>
+                        <div class="chart-title" id="chartTitle">Research Directions</div>
+                        <div class="chart-container">
+                            <canvas id="taxonomyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="methods-section" id="methodsPanel"></div>
+                </div>
+                <div class="image-card taxonomy-static">
+                    <img src="assets/taxonomy.png" alt="Taxonomy">
+                    <p class="caption">Problem-driven taxonomy of feed-forward 3D scene modeling.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="directions" class="page">
+            <div class="section">
+                <h2>Directions</h2>
+                <p class="lead">
+                    The current survey emphasizes a challenge-driven perspective: stronger implicit features,
+                    geometry awareness, model efficiency, augmentation strategies, and temporal consistency.
+                </p>
+                <div class="image-card">
+                    <img src="assets/directions.png" alt="Direction Taxonomy Overview">
+                    <p class="caption">Direction Taxonomy Overview.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Direction Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h4>Feature Enhancement</h4>
+                        <p class="muted">Representative methods: PixelNeRF, IBRNet, SRT, DUSt3R, MASt3R, iLRM, Dens3r, MoRE, Uni3R.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Geometry Awareness</h4>
+                        <p class="muted">Representative methods: MVSNeRF, GeoNeRF, MuRF, pixelSplat, MVSplat, HiSplat, AnySplat, YoNoSplat.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Model Efficiency</h4>
+                        <p class="muted">Representative methods: ENeRF, ProNeRF, ZPressor, Long-LRM, FastVGGT, LiteVGGT, Speed3R, SR3R.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Augmentation Strategies</h4>
+                        <p class="muted">Representative methods: Puzzles, MegaSynth, Aug3D, MVBoost, MVSplat360, latentSplat, ProSplat.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Temporal-aware Models</h4>
+                        <p class="muted">Representative methods: StreamSplat, CUT3R, Stream3R, LongStream, MonST3R, 4DGT, MoVieS, DAS3R.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="benchmarks" class="page">
+            <div class="section">
+                <h2>Datasets</h2>
+                <p class="lead">
+                    The survey revisits datasets from a new perspective, distinguishing geometry-oriented and visual-oriented resources,
+                    while also covering a broad mixed category used in practice.
+                </p>
+                <div class="image-card">
+                    <img src="assets/dataset.png" alt="Datasets">
+                    <p class="caption">Dataset landscape used in the survey.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Dataset Groups</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h4>Geometry-Oriented</h4>
+                        <p class="muted">Examples: DTU, 7-Scenes, ETH3D, ScanNet, ScanNet++, ARKitScenes, Waymo, nuScenes.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Visual-Oriented</h4>
+                        <p class="muted">Examples: NeRF-Synthetic, ACID, LLFF, RealEstate10K, DL3DV-10K, Mip-NeRF 360, Neural3DV.</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Mixed</h4>
+                        <p class="muted">Examples: GSO, OmniObject3D, CO3D, WildRGBD, ShapeNet, MVImgNet, Objaverse-XL, Hypersim.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Benchmark Takeaways</h2>
+                <div class="list-block">
+                    <ul>
+                        <li>DTU 3-view NVS remains a common small-view benchmark for generalizable rendering methods.</li>
+                        <li>RealEstate10K is a standard large-scale benchmark for sparse-view feed-forward 3D reconstruction.</li>
+                        <li>Pointmap and pose evaluation is increasingly important alongside novel-view rendering quality.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="applications" class="page">
+            <div class="section">
+                <h2>Applications</h2>
+                <p class="lead">
+                    Feed-forward 3D scene modeling is increasingly used in downstream systems that need fast,
+                    robust, and geometry-aware inference without per-scene optimization.
+                </p>
+                <div class="image-card">
+                    <img src="assets/application.png" alt="Applications">
+                    <p class="caption">Application landscape summarized in the survey.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Application Areas</h2>
+                <div class="app-grid">
+                    <div class="app-card">
+                        <h4>Autonomous Driving</h4>
+                        <p class="muted">Representative methods: SCube, InfiniCube, STORM, Driv3R, DrivingRecon, DrivingForward, EVolSplat, WorldSplat.</p>
+                    </div>
+                    <div class="app-card">
+                        <h4>Robotics</h4>
+                        <p class="muted">Representative methods: GraspNeRF, ManiGaussian, GAF, GaussianGrasper, EmbodiedSplat, UnitedVLN, VR-Robo, IGL-Nav.</p>
+                    </div>
+                    <div class="app-card">
+                        <h4>SfM & SLAM</h4>
+                        <p class="muted">Representative methods: VGGSfM, Light3R-SfM, MASt3R-SLAM, SLAM3R, VGGT-SLAM, ARTDECO, ViSTA-SLAM.</p>
+                    </div>
+                    <div class="app-card">
+                        <h4>Scene Understanding</h4>
+                        <p class="muted">Representative methods: SLGaussian, SemanticSplat, AlignGS, 3DRS, Spatial-MLLM, VG-LLM, VLM-3R.</p>
+                    </div>
+                    <div class="app-card">
+                        <h4>Video Generation</h4>
+                        <p class="muted">Representative methods: MVSplat360, JOG3R, GenFusion, ReVision, Geometry Forcing, 4DNeX, Lyra, WorldForge.</p>
+                    </div>
+                    <div class="app-card">
+                        <h4>Others</h4>
+                        <p class="muted">Representative methods: Splatter-360, PanSplat, PanoVGGT, Reloc3r, SAIL-Recon, Human3R, LoRA3D, Reflect3r.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetPage = this.getAttribute('data-page');
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    pages.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(targetPage).classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        });
+
+        const taxonomyData = {
+            main: {
+                labels: [
+                    'Feature Enhancement',
+                    'Geometry Awareness',
+                    'Model Efficiency',
+                    'Augmentation Strategies',
+                    'Temporal-aware Models'
+                ],
+                data: [59, 51, 15, 9, 19],
+                colors: ['#1e40af', '#e85d5d', '#14b8a6', '#8b5cf6', '#f59e0b']
+            },
+            subcategories: {
+                'Feature Enhancement': {
+                    labels: ['Advanced Encoding Architectures', 'Cross-View Fusion', 'Integration of Visual Foundation Models'],
+                    data: [25, 30, 4],
+                    colors: ['#1e40af', '#4a79df', '#88a9f0'],
+                    subsections: {
+                        'Advanced Encoding Architectures': {
+                            description: 'Backbone and decoder designs that improve implicit feature quality and representation capacity.',
+                            methods: [
+                                'pixelNeRF', 'IBRNet', 'Splatter Image', 'Convolutional Occupancy Networks',
+                                'Light Field Networks', 'Learned Initializations', 'NeuRay', 'C3-GS', 'SRT',
+                                'VisionNeRF', 'RePAST', 'GNT', 'LRM', 'Instant3D', 'TripoSR', 'GRM',
+                                'GS-LRM', 'MeshLRM', 'MeshFormer', 'Flex3D', 'LVSM', 'Depth Anything 3',
+                                'Gamba', 'MVGamba', 'Long-LRM'
+                            ]
+                        },
+                        'Cross-View Fusion': {
+                            description: 'Methods that strengthen multi-view correspondence, memory, and long-context aggregation.',
+                            methods: [
+                                'AttnRend', 'eFreeSplat', 'LGM', 'DUSt3R', 'MASt3R', 'MV-DUSt3R',
+                                'MV-DUSt3R+', 'PreF3R', 'Spann3R', 'Fast3R', 'MUSt3R', 'WinT3R',
+                                'CUT3R', 'VolSplat', 'G-CUT3R', 'TTT3R', 'Point3R', 'VGGT', 'iLRM',
+                                'Dens3r', 'MoRE', 'Uni3R', 'Flow3r', 'Gen3R', 'NOVA3R', 'IncVGGT',
+                                'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3'
+                            ]
+                        },
+                        'Integration of Visual Foundation Models': {
+                            description: 'Methods that inject pre-trained visual or geometric priors into feed-forward reconstruction.',
+                            methods: ['DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat']
+                        }
+                    }
+                },
+                'Geometry Awareness': {
+                    labels: ['Explicit Geometric Aggregation', 'Post Refinement', 'Pose-Free Reconstruction', 'Pre-trained Geometric Guidance'],
+                    data: [24, 6, 15, 6],
+                    colors: ['#e85d5d', '#f08787', '#f6b3b3', '#ffd4d4'],
+                    subsections: {
+                        'Explicit Geometric Aggregation': {
+                            description: 'Methods that impose stronger geometry via cost volumes, correspondences, surfaces, or hybrid structures.',
+                            methods: [
+                                'MVSNeRF', 'SRF', 'GeoNeRF', 'BoostMVSNeRFs', 'GPNR', 'MatchNeRF',
+                                'GTA', 'MuRF', 'SparseNeuS', 'VolRecon', 'ReTR', 'UFORecon',
+                                'SurfaceSplat', 'RenderFormer', 'AGG', 'TGS', 'LaRa', 'MeshSplat',
+                                'TranSplat', 'H3R', 'MuGS', 'pixelSplat', 'MVSplat', 'MVSGaussian'
+                            ]
+                        },
+                        'Post Refinement': {
+                            description: 'Post-refinement methods that densify or improve predicted Gaussian scenes.',
+                            methods: ['FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R']
+                        },
+                        'Pose-Free Reconstruction': {
+                            description: 'Methods that jointly infer geometry and cameras from uncalibrated or unconstrained views.',
+                            methods: [
+                                'LEAP', 'Splatt3R', 'NoPoSplat', 'PF3plat', 'FreeSplatter', 'FLARE',
+                                'Pow3R', 'RegGS', 'UFV-Splatter', 'pi3', 'AnySplat', 'No Pose at All',
+                                'SPFSplatV2', 'PLANA3R', 'YoNoSplat'
+                            ]
+                        },
+                        'Pre-trained Geometric Guidance': {
+                            description: 'Methods that inject monocular depth, normals, or geometry priors from strong teachers.',
+                            methods: ['DepthSplat', 'Flash3D', 'Niagara', 'PM-Loss', 'Fin3R', 'JointSplat']
+                        }
+                    }
+                },
+                'Model Efficiency': {
+                    labels: ['Feature Efficiency', 'Representation Compaction'],
+                    data: [11, 4],
+                    colors: ['#14b8a6', '#6ee7d8'],
+                    subsections: {
+                        'Feature Efficiency': {
+                            description: 'Architectural and systems techniques for faster or lighter feed-forward inference.',
+                            methods: [
+                                'ENeRF', 'ProNeRF', 'TinySplat', 'ZPressor', 'FastVGGT',
+                                'Quantized Visual Geometry Grounded Transformer',
+                                'Faster VGGT with Block-Sparse Global Attention',
+                                'Evict3R', 'LiteVGGT', 'Speed3R', 'SR3R'
+                            ]
+                        },
+                        'Representation Compaction': {
+                            description: 'Methods that reduce redundancy in Gaussian scene representations.',
+                            methods: ['GGN', 'PixelGaussian', 'FreeSplat++', 'LongSplat']
+                        }
+                    }
+                },
+                'Augmentation Strategies': {
+                    labels: ['Data Augmentation', 'Visual Augmentation'],
+                    data: [4, 5],
+                    colors: ['#8b5cf6', '#b794f4'],
+                    subsections: {
+                        'Data Augmentation': {
+                            description: 'Data scaling and multi-view refinement strategies.',
+                            methods: ['MegaSynth', 'Puzzles', 'Aug3D', 'MVBoost']
+                        },
+                        'Visual Augmentation': {
+                            description: 'Methods that use diffusion or generative priors to improve visual fidelity.',
+                            methods: ['MVSplat360', 'latentSplat', 'ProSplat', 'Difix3D+', 'Reconstruct, Inpaint, Finetune']
+                        }
+                    }
+                },
+                'Temporal-aware Models': {
+                    labels: ['Online Streaming', 'Offline Processing', 'Interactive Modeling', 'Specialized Tasks'],
+                    data: [5, 10, 2, 2],
+                    colors: ['#f59e0b', '#f8b84c', '#facc7f', '#fde2b3'],
+                    subsections: {
+                        'Online Streaming': {
+                            description: 'Causal and streaming reconstruction models.',
+                            methods: ['StreamSplat', 'CUT3R', 'DGS-LRM', 'Stream3R', 'LongStream']
+                        },
+                        'Offline Processing': {
+                            description: 'Windowed or batch temporal models for globally consistent 4D reconstruction.',
+                            methods: ['L4GM', '4D-LRM', 'MonST3R', 'Easi3R', '4DGT', 'MoVieS', '4Real-Video-V2', 'MonoFusion', 'EgoMono4D', 'BTimer']
+                        },
+                        'Interactive Modeling': {
+                            description: 'Methods that couple feed-forward reconstruction with physics or interactive editing.',
+                            methods: ['PIXIE', 'PhysGM']
+                        },
+                        'Specialized Tasks': {
+                            description: 'Task-specific temporal pipelines.',
+                            methods: ['DAS3R', 'St4RTrack']
+                        }
+                    }
+                }
+            }
+        };
+
+        let currentChart = null;
+        let currentLevel = 'main';
+        let currentCategory = null;
+
+        const chartConfig = {
+            type: 'pie',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            padding: 14,
+                            font: {
+                                size: 12,
+                                weight: '700'
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 13
+                        },
+                        formatter: (value, ctx) => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return percentage > 4 ? percentage + '%' : '';
+                        }
+                    }
+                },
+                onClick: handleChartClick
+            },
+            plugins: [ChartDataLabels]
+        };
+
+        function createChart(data) {
+            const ctx = document.getElementById('taxonomyChart').getContext('2d');
+            return new Chart(ctx, {
+                ...chartConfig,
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.colors,
+                        borderColor: '#fff',
+                        borderWidth: 3
+                    }]
+                }
+            });
+        }
+
+        function showMainChart() {
+            currentLevel = 'main';
+            currentCategory = null;
+            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('chartTitle').textContent = 'Research Directions';
+            if (currentChart) currentChart.destroy();
+            currentChart = createChart(taxonomyData.main);
+            document.getElementById('methodsPanel').innerHTML = `
+                <h3>About This Taxonomy</h3>
+                <p class="muted">Click a category in the chart to inspect its subcategories and representative methods.</p>
+            `;
+        }
+
+        function showSubcategories(category) {
+            currentLevel = 'subcategory';
+            currentCategory = category;
+            const subData = taxonomyData.subcategories[category];
+            document.getElementById('backButton').style.display = 'inline-block';
+            document.getElementById('chartTitle').textContent = category;
+            if (currentChart) currentChart.destroy();
+            currentChart = createChart({
+                labels: subData.labels,
+                data: subData.data,
+                colors: subData.colors
+            });
+
+            let html = `<h3>${category}</h3>`;
+            subData.labels.forEach(label => {
+                const block = subData.subsections[label];
+                html += `
+                    <div class="subsection-item">
+                        <h4>${label}</h4>
+                        <p class="muted">${block.description}</p>
+                        <div class="method-list">
+                            ${block.methods.map(m => `<div class="method-item">${m}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('methodsPanel').innerHTML = html;
+        }
+
+        function showMethods(category, subsection) {
+            const block = taxonomyData.subcategories[category].subsections[subsection];
+            document.getElementById('methodsPanel').innerHTML = `
+                <h3>${subsection}</h3>
+                <p class="muted">${block.description}</p>
+                <div class="method-list">
+                    ${block.methods.map(m => `<div class="method-item">${m}</div>`).join('')}
+                </div>
+            `;
+        }
+
+        function handleChartClick(event, elements) {
+            if (!elements.length) return;
+            const index = elements[0].index;
+            const label = event.chart.data.labels[index];
+            if (currentLevel === 'main') {
+                showSubcategories(label);
+            } else if (currentLevel === 'subcategory') {
+                showMethods(currentCategory, label);
+            }
+        }
+
+        document.getElementById('backButton').addEventListener('click', showMainChart);
+        showMainChart();
+    </script>
+</body>
+</html>
