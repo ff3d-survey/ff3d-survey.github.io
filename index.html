@@ -435,20 +435,22 @@
 
         .overview-grid,
         .summary-grid,
-        .app-grid {
-            display: grid;
-            gap: 18px;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        }
-
-        .summary-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
+        .app-grid,
         .stats {
-            display: grid;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 18px;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .overview-grid > *,
+        .summary-grid > *,
+        .app-grid > * {
+            flex: 0 1 320px;
+        }
+
+        .stats > * {
+            flex: 0 1 240px;
         }
 
         .stat-card {
@@ -587,6 +589,20 @@
             font-weight: 600;
         }
 
+        .method-item a:hover,
+        .method-item a:focus-visible,
+        .linked-inline-list a:hover,
+        .linked-inline-list a:focus-visible {
+            text-decoration: underline;
+        }
+
+        .linked-inline-list a,
+        .linked-inline-list a:visited {
+            color: var(--blue-700);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
         .subsection-item {
             margin-top: 18px;
             padding-top: 18px;
@@ -646,11 +662,6 @@
             .affiliations {
                 line-height: 1.7;
             }
-
-            .summary-grid {
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            }
-
             .hero-content {
                 padding: 20px 18px;
             }
@@ -918,6 +929,7 @@
         </div>
     </div>
 
+    <script src="assets/resource-links.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const navLinks = document.querySelectorAll('.nav-link');
@@ -935,6 +947,50 @@
                 });
             });
         });
+
+        const resourceLinks = window.resourceLinks || {};
+        const normalizedResourceLinks = Object.fromEntries(
+            Object.entries(resourceLinks).map(([name, url]) => [normalizeResourceKey(name), url])
+        );
+
+        function normalizeResourceKey(name) {
+            return String(name).toLowerCase().replace(/[^a-z0-9]+/g, '');
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getResourceLink(name) {
+            return resourceLinks[name] || normalizedResourceLinks[normalizeResourceKey(name)] || null;
+        }
+
+        function renderLinkedLabel(name) {
+            const safeName = escapeHtml(name);
+            const link = getResourceLink(name);
+            if (!link) return safeName;
+            return `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${safeName}</a>`;
+        }
+
+        function renderMethodChip(name) {
+            return `<div class="method-item">${renderLinkedLabel(name)}</div>`;
+        }
+
+        function linkifyStaticCardLists() {
+            document.querySelectorAll('.summary-card .muted, .app-card .muted').forEach((paragraph) => {
+                const match = paragraph.textContent.trim().match(/^(Representative methods|Examples):\s*(.+?)\.\s*$/);
+                if (!match) return;
+                const [, label, values] = match;
+                const items = values.split(',').map((item) => item.trim()).filter(Boolean);
+                paragraph.classList.add('linked-inline-list');
+                paragraph.innerHTML = `${escapeHtml(label)}: ${items.map((item) => renderLinkedLabel(item)).join(', ')}.`;
+            });
+        }
 
         const taxonomyData = {
             main: {
@@ -1164,7 +1220,7 @@
                         <h4>${label}</h4>
                         <p class="muted">${block.description}</p>
                         <div class="method-list">
-                            ${block.methods.map(m => `<div class="method-item">${m}</div>`).join('')}
+                            ${block.methods.map(renderMethodChip).join('')}
                         </div>
                     </div>
                 `;
@@ -1178,7 +1234,7 @@
                 <h3>${subsection}</h3>
                 <p class="muted">${block.description}</p>
                 <div class="method-list">
-                    ${block.methods.map(m => `<div class="method-item">${m}</div>`).join('')}
+                    ${block.methods.map(renderMethodChip).join('')}
                 </div>
             `;
         }
@@ -1195,6 +1251,7 @@
         }
 
         document.getElementById('backButton').addEventListener('click', showMainChart);
+        linkifyStaticCardLists();
         showMainChart();
     </script>
 </body>
