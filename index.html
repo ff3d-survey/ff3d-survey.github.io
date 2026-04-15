@@ -183,6 +183,12 @@
             content: "💻";
         }
 
+        .links a.researchgate-link::before {
+            content: "RG";
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
         .hero-scene {
             position: absolute;
             inset: 0;
@@ -508,6 +514,40 @@
             color: var(--slate-500);
         }
 
+        .citation-intro {
+            color: var(--slate-700);
+            margin-bottom: 18px;
+        }
+
+        .citation-intro a {
+            color: var(--blue-700);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .citation-intro a:hover,
+        .citation-intro a:focus-visible {
+            text-decoration: underline;
+        }
+
+        .bibtex-block {
+            background-color: #e9eeef;
+            border: 1px solid #d7e0e3;
+            border-radius: 15px;
+            padding: 1.5em;
+            overflow-x: auto;
+        }
+
+        .bibtex-block code {
+            display: block;
+            color: var(--slate-900);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
         .taxonomy-container {
             display: flex;
             gap: 24px;
@@ -666,6 +706,14 @@
                 padding: 20px 18px;
             }
 
+            .bibtex-block {
+                padding: 1.2em;
+            }
+
+            .bibtex-block code {
+                font-size: 0.88rem;
+            }
+
         }
     </style>
 </head>
@@ -724,7 +772,8 @@
                 </p>
                 <div class="links">
                     <a class="paper-link" href="feed-forward-3d-scene-modeling.pdf" target="_blank" rel="noopener noreferrer">Paper</a>
-                    <a class="github-link" href="https://github.com/ziplab/Awesome-Feed-Forward-3D" target="_blank">GitHub</a>
+                    <a class="github-link" href="https://github.com/ziplab/Awesome-Feed-Forward-3D" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a class="researchgate-link" href="https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective" target="_blank" rel="noopener noreferrer">ResearchGate</a>
                 </div>
             </div>
         </header>
@@ -773,6 +822,22 @@
                     <img src="assets/overview.png" alt="Overview">
                     <p class="caption">Overview of the survey scope and organization.</p>
                 </div>
+            </div>
+
+            <div class="section">
+                <h2>Citation</h2>
+                <p class="citation-intro">
+                    If you find this survey useful, please consider citing it. The preprint is also available on
+                    <a href="https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective" target="_blank" rel="noopener noreferrer">ResearchGate</a>.
+                </p>
+                <pre class="bibtex-block"><code>@misc{wang2026feedforward,
+  title={Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective},
+  author={Wang, Weijie and Cao, Qihang and Gao, Sensen and Chen, Donny Y. and Xu, Haofei and Bian, Wenjing and Peng, Songyou and Cham, Tat-Jen and Zheng, Chuanxia and Geiger, Andreas and Cai, Jianfei and Bian, Jiawang and Zhuang, Bohan},
+  year={2026},
+  note={Preprint submitted to Springer Nature},
+  doi={10.13140/RG.2.2.33299.85287},
+  url={https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective}
+}</code></pre>
             </div>
 
         </div>
