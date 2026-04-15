@@ -183,10 +183,21 @@
             content: "💻";
         }
 
+        .links a.researchgate-link {
+            padding: 10px 16px;
+            letter-spacing: 0;
+        }
+
         .links a.researchgate-link::before {
-            content: "RG";
-            font-size: 0.78rem;
-            font-weight: 800;
+            display: none;
+        }
+
+        .links a.researchgate-link img {
+            width: 18px;
+            height: 18px;
+            display: block;
+            border-radius: 4px;
+            flex: 0 0 auto;
         }
 
         .hero-scene {
@@ -536,6 +547,7 @@
             border-radius: 15px;
             padding: 1.5em;
             overflow-x: auto;
+            cursor: pointer;
         }
 
         .bibtex-block code {
@@ -759,7 +771,7 @@
                     <a href="https://physicalvision.github.io/people/~chuanxia" target="_blank" rel="noopener noreferrer">Chuanxia Zheng</a><sup>2</sup>
                     <a href="https://www.cvlibs.net/" target="_blank" rel="noopener noreferrer">Andreas Geiger</a><sup>5</sup>
                     <a href="https://jianfei-cai.github.io/" target="_blank" rel="noopener noreferrer">Jianfei Cai</a><sup>3</sup>
-                    <a href="https://jwbian.net/" target="_blank" rel="noopener noreferrer">Jiawang Bian</a><sup>2*</sup>
+                    <a href="https://jwbian.net/" target="_blank" rel="noopener noreferrer">Jia-Wang Bian</a><sup>2*</sup>
                     <a href="https://bohanzhuang.github.io/" target="_blank" rel="noopener noreferrer">Bohan Zhuang</a><sup>1*</sup>
                 </p>
                 <p class="author-note">† Equal contribution &nbsp;&nbsp; ‡ Project Lead &nbsp;&nbsp; * Corresponding authors</p>
@@ -773,7 +785,10 @@
                 <div class="links">
                     <a class="paper-link" href="feed-forward-3d-scene-modeling.pdf" target="_blank" rel="noopener noreferrer">Paper</a>
                     <a class="github-link" href="https://github.com/ziplab/Awesome-Feed-Forward-3D" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a class="researchgate-link" href="https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective" target="_blank" rel="noopener noreferrer">ResearchGate</a>
+                    <a class="researchgate-link" href="https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective" target="_blank" rel="noopener noreferrer" aria-label="ResearchGate" title="ResearchGate">
+                        <img src="assets/researchgate.ico" alt="" aria-hidden="true">
+                        <span>ResearchGate</span>
+                    </a>
                 </div>
             </div>
         </header>
@@ -827,14 +842,12 @@
             <div class="section">
                 <h2>Citation</h2>
                 <p class="citation-intro">
-                    If you find this survey useful, please consider citing it. The preprint is also available on
-                    <a href="https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective" target="_blank" rel="noopener noreferrer">ResearchGate</a>.
+                    If you find this survey useful, please consider citing it.
                 </p>
-                <pre class="bibtex-block"><code>@misc{wang2026feedforward,
+                <pre class="bibtex-block" tabindex="0" title="Click to select BibTeX"><code>@misc{wang2026feedforward,
   title={Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective},
   author={Wang, Weijie and Cao, Qihang and Gao, Sensen and Chen, Donny Y. and Xu, Haofei and Bian, Wenjing and Peng, Songyou and Cham, Tat-Jen and Zheng, Chuanxia and Geiger, Andreas and Cai, Jianfei and Bian, Jiawang and Zhuang, Bohan},
   year={2026},
-  note={Preprint submitted to Springer Nature},
   doi={10.13140/RG.2.2.33299.85287},
   url={https://www.researchgate.net/publication/403843361_Feed-Forward_3D_Scene_Modeling_A_Problem-Driven_Perspective}
 }</code></pre>
@@ -999,9 +1012,18 @@
         document.addEventListener('DOMContentLoaded', function () {
             const navLinks = Array.from(document.querySelectorAll('.nav-link'));
             const pages = Array.from(document.querySelectorAll('.page'));
+            const bibtexBlocks = Array.from(document.querySelectorAll('.bibtex-block'));
             const pageIds = new Set(pages.map(page => page.id));
             const savedScrollPositions = new Map();
             let activePage = navLinks.find(link => link.classList.contains('active'))?.getAttribute('data-page') || pages[0]?.id || null;
+
+            function selectElementContents(element) {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(element);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
 
             navLinks.forEach(link => {
                 if (link.getAttribute('data-page') === activePage) {
@@ -1069,6 +1091,19 @@
                     e.preventDefault();
                     const targetPage = this.getAttribute('data-page');
                     setActivePage(targetPage, { updateHash: true });
+                });
+            });
+
+            bibtexBlocks.forEach(block => {
+                block.addEventListener('click', function () {
+                    selectElementContents(this);
+                });
+
+                block.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectElementContents(this);
+                    }
                 });
             });
         });
