@@ -401,6 +401,18 @@
 
         .page.active {
             display: block;
+            animation: page-fade-in 0.2s ease-out;
+        }
+
+        @keyframes page-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .section {
@@ -727,6 +739,12 @@
             }
 
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .page.active {
+                animation: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1014,7 +1032,6 @@
             const pages = Array.from(document.querySelectorAll('.page'));
             const bibtexBlocks = Array.from(document.querySelectorAll('.bibtex-block'));
             const pageIds = new Set(pages.map(page => page.id));
-            const savedScrollPositions = new Map();
             let activePage = navLinks.find(link => link.classList.contains('active'))?.getAttribute('data-page') || pages[0]?.id || null;
 
             function selectElementContents(element) {
@@ -1046,9 +1063,6 @@
                 }
 
                 const currentScrollTop = window.scrollY;
-                if (activePage) {
-                    savedScrollPositions.set(activePage, currentScrollTop);
-                }
 
                 navLinks.forEach(link => {
                     const isActive = link.getAttribute('data-page') === targetPage;
@@ -1073,11 +1087,8 @@
                 if (!restoreScroll) return;
 
                 requestAnimationFrame(() => {
-                    const targetScrollTop = savedScrollPositions.has(targetPage)
-                        ? savedScrollPositions.get(targetPage)
-                        : currentScrollTop;
                     const maxScrollTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-                    window.scrollTo({ top: Math.min(targetScrollTop, maxScrollTop) });
+                    document.scrollingElement.scrollTop = Math.min(currentScrollTop, maxScrollTop);
                 });
             }
 
