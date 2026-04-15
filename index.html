@@ -932,18 +932,78 @@
     <script src="assets/resource-links.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const navLinks = document.querySelectorAll('.nav-link');
-            const pages = document.querySelectorAll('.page');
+            const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+            const pages = Array.from(document.querySelectorAll('.page'));
+            const pageIds = new Set(pages.map(page => page.id));
+            const savedScrollPositions = new Map();
+            let activePage = navLinks.find(link => link.classList.contains('active'))?.getAttribute('data-page') || pages[0]?.id || null;
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-page') === activePage) {
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.removeAttribute('aria-current');
+                }
+            });
+
+            function setActivePage(targetPage, options = {}) {
+                const { updateHash = false, restoreScroll = true } = options;
+
+                if (!pageIds.has(targetPage)) return;
+
+                if (targetPage === activePage) {
+                    if (updateHash) {
+                        history.replaceState(null, '', `#${targetPage}`);
+                    }
+                    return;
+                }
+
+                const currentScrollTop = window.scrollY;
+                if (activePage) {
+                    savedScrollPositions.set(activePage, currentScrollTop);
+                }
+
+                navLinks.forEach(link => {
+                    const isActive = link.getAttribute('data-page') === targetPage;
+                    link.classList.toggle('active', isActive);
+                    if (isActive) {
+                        link.setAttribute('aria-current', 'page');
+                    } else {
+                        link.removeAttribute('aria-current');
+                    }
+                });
+
+                pages.forEach(page => {
+                    page.classList.toggle('active', page.id === targetPage);
+                });
+
+                activePage = targetPage;
+
+                if (updateHash) {
+                    history.replaceState(null, '', `#${targetPage}`);
+                }
+
+                if (!restoreScroll) return;
+
+                requestAnimationFrame(() => {
+                    const targetScrollTop = savedScrollPositions.has(targetPage)
+                        ? savedScrollPositions.get(targetPage)
+                        : currentScrollTop;
+                    const maxScrollTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+                    window.scrollTo({ top: Math.min(targetScrollTop, maxScrollTop) });
+                });
+            }
+
+            const initialPage = window.location.hash.slice(1);
+            if (pageIds.has(initialPage)) {
+                setActivePage(initialPage, { restoreScroll: false });
+            }
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
                     const targetPage = this.getAttribute('data-page');
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    pages.forEach(p => p.classList.remove('active'));
-                    this.classList.add('active');
-                    document.getElementById(targetPage).classList.add('active');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setActivePage(targetPage, { updateHash: true });
                 });
             });
         });
