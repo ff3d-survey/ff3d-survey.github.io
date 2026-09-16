@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -575,92 +573,347 @@
             word-break: break-word;
         }
 
-        .taxonomy-container {
+        .taxonomy-rule {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .taxonomy-rule-card {
+            background: #f8fbff;
+            border: 1px solid var(--slate-200);
+            border-radius: 16px;
+            padding: 16px 18px;
+        }
+
+        .taxonomy-rule-card strong {
+            color: var(--blue-900);
+        }
+
+        .taxonomy-toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(190px, 0.45fr) auto;
+            gap: 12px;
+            align-items: center;
+            margin: 20px 0 12px;
+        }
+
+        .taxonomy-toolbar input,
+        .taxonomy-toolbar select,
+        .taxonomy-toolbar button {
+            min-height: 44px;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--slate-900);
+            padding: 10px 13px;
+            font: inherit;
+        }
+
+        .taxonomy-toolbar button {
+            background: var(--blue-700);
+            border-color: var(--blue-700);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .taxonomy-toolbar input:focus-visible,
+        .taxonomy-toolbar select:focus-visible,
+        .taxonomy-toolbar button:focus-visible,
+        .taxonomy-method-button:focus-visible,
+        .taxonomy-method-link:focus-visible {
+            outline: 3px solid rgba(36, 88, 198, 0.24);
+            outline-offset: 2px;
+        }
+
+        .taxonomy-status {
+            color: var(--slate-500);
+            font-size: 0.92rem;
+            margin-bottom: 14px;
+        }
+
+        .taxonomy-graph-shell {
+            background: #f8fbff;
+            border: 1px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 22px;
+            overflow-x: auto;
+        }
+
+        .taxonomy-root-node {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+            color: #fff;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-weight: 800;
+            box-shadow: 0 8px 20px rgba(36, 88, 198, 0.2);
+        }
+
+        .taxonomy-root-node span {
+            font-size: 0.8rem;
+            opacity: 0.82;
+            font-weight: 600;
+        }
+
+        .taxonomy-detail-panel {
+            margin-top: 18px;
+            padding: 18px 20px;
+            border: 1px solid var(--slate-200);
+            border-left: 5px solid var(--blue-700);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .taxonomy-detail-panel h3 {
+            margin-bottom: 8px;
+        }
+
+        .taxonomy-detail-panel p + p {
+            margin-top: 8px;
+        }
+
+        .taxonomy-detail-panel a {
+            color: var(--blue-700);
+            font-weight: 700;
+        }
+
+        .taxonomy-reviewer-examples {
             display: flex;
-            gap: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 9px;
+            margin: 18px 0;
+        }
+
+        .taxonomy-reviewer-examples::before {
+            content: "Cross-category examples:";
+            color: var(--slate-700);
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .taxonomy-example-button {
+            border: 1px solid #a7d7c5;
+            border-radius: 999px;
+            background: #ecfdf5;
+            color: #166534;
+            padding: 7px 11px;
+            cursor: pointer;
+            font: inherit;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .taxonomy-network {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(270px, 0.38fr) minmax(520px, 1fr);
+            gap: 42px;
+            min-height: 720px;
+        }
+
+        .taxonomy-edge-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .taxonomy-edge {
+            fill: none;
+            stroke: var(--blue-700);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            opacity: 0.62;
+        }
+
+        .taxonomy-category-panel,
+        .taxonomy-method-panel {
+            position: relative;
+            z-index: 2;
+        }
+
+        .taxonomy-category-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .taxonomy-category-group {
+            --direction-color: var(--blue-700);
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-top: 4px solid var(--direction-color);
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 6px 15px rgba(15, 23, 42, 0.05);
+        }
+
+        .taxonomy-category-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 9px;
+            color: var(--slate-900);
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .taxonomy-category-heading span:last-child {
+            color: var(--slate-500);
+            font-size: 0.72rem;
+            font-weight: 650;
+        }
+
+        .taxonomy-category-nodes {
+            display: grid;
+            gap: 7px;
+        }
+
+        .taxonomy-category-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border: 1px solid var(--slate-200);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--slate-700);
+            padding: 8px 10px;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+        }
+
+        .taxonomy-category-button:hover,
+        .taxonomy-category-button.is-connected {
+            border-color: var(--direction-color);
+            background: color-mix(in srgb, var(--direction-color) 8%, white);
+        }
+
+        .taxonomy-category-button.is-selected {
+            border-color: var(--direction-color);
+            background: color-mix(in srgb, var(--direction-color) 15%, white);
+            transform: translateX(3px);
+        }
+
+        .taxonomy-category-button span:last-child {
+            color: var(--slate-500);
+            font-size: 0.7rem;
+        }
+
+        .taxonomy-method-panel {
+            max-height: 940px;
+            overflow-y: auto;
+            scrollbar-gutter: stable;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--slate-200);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .taxonomy-method-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(155px, 1fr));
+            gap: 9px;
+        }
+
+        .taxonomy-method-node {
+            --node-color: var(--blue-700);
+            position: relative;
+            display: flex;
             align-items: stretch;
+            min-width: 0;
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+        }
+
+        .taxonomy-method-node.is-cross-category {
+            border-color: #a7d7c5;
+        }
+
+        .taxonomy-method-node.is-connected,
+        .taxonomy-method-node.is-selected {
+            border-color: var(--node-color);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--node-color) 18%, transparent);
+            transform: translateY(-1px);
+        }
+
+        .taxonomy-network.has-selection .taxonomy-method-node:not(.is-connected):not(.is-selected),
+        .taxonomy-network.has-selection .taxonomy-category-button:not(.is-connected):not(.is-selected) {
+            opacity: 0.28;
+        }
+
+        .taxonomy-method-button {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            background: transparent;
+            color: var(--slate-900);
+            text-align: left;
+            padding: 10px 8px 10px 11px;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .taxonomy-method-name {
+            display: block;
+            overflow-wrap: anywhere;
+            font-size: 0.86rem;
+            font-weight: 750;
+            line-height: 1.35;
+        }
+
+        .taxonomy-membership-count {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 6px;
+            border-radius: 999px;
+            padding: 2px 7px;
+            background: var(--blue-100);
+            color: var(--blue-900);
+            font-size: 0.66rem;
+            line-height: 1.4;
+            font-weight: 800;
+        }
+
+        .taxonomy-method-node.is-cross-category .taxonomy-membership-count {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .taxonomy-method-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 34px;
+            color: var(--blue-700);
+            border-left: 1px solid var(--slate-200);
+            text-decoration: none;
+            font-weight: 800;
+        }
+
+        .taxonomy-method-link:hover {
+            background: var(--blue-100);
         }
 
         .taxonomy-static {
             margin-top: 24px;
-        }
-
-        .chart-section {
-            flex: 0 0 55%;
-            background: #f8fbff;
-            border: 1px solid var(--slate-200);
-            border-radius: 18px;
-            padding: 22px;
-            min-height: 620px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .methods-section {
-            flex: 1;
-            background: #f8fbff;
-            border: 1px solid var(--slate-200);
-            border-radius: 18px;
-            padding: 22px;
-            overflow-y: auto;
-            min-height: 620px;
-        }
-
-        .chart-container {
-            height: 100%;
-            min-height: 500px;
-            background: #fff;
-            border: 1px solid var(--slate-200);
-            border-radius: 18px;
-            padding: 16px;
-            flex: 1;
-        }
-
-        .chart-title {
-            text-align: center;
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: var(--blue-900);
-            margin-bottom: 16px;
-        }
-
-        .back-button {
-            border: none;
-            background: var(--blue-700);
-            color: #fff;
-            font-weight: 700;
-            padding: 10px 16px;
-            border-radius: 999px;
-            cursor: pointer;
-            margin-bottom: 14px;
-        }
-
-        .method-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .method-item {
-            background: #fff;
-            border: 1px solid var(--slate-200);
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-size: 0.94rem;
-        }
-
-        .method-item a {
-            text-decoration: none;
-            color: var(--blue-700);
-            font-weight: 600;
-        }
-
-        .method-item a:hover,
-        .method-item a:focus-visible,
-        .linked-inline-list a:hover,
-        .linked-inline-list a:focus-visible {
-            text-decoration: underline;
         }
 
         .linked-inline-list a,
@@ -670,16 +923,9 @@
             font-weight: 600;
         }
 
-        .subsection-item {
-            margin-top: 18px;
-            padding-top: 18px;
-            border-top: 1px solid var(--slate-200);
-        }
-
-        .subsection-item:first-child {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
+        .linked-inline-list a:hover,
+        .linked-inline-list a:focus-visible {
+            text-decoration: underline;
         }
 
         .list-block {
@@ -716,18 +962,18 @@
                 font-size: 2.7rem;
             }
 
-            .taxonomy-container {
-                flex-direction: column;
+            .taxonomy-network {
+                grid-template-columns: 1fr;
+                gap: 28px;
             }
 
-            .chart-section {
-                flex: 1 1 auto;
-                min-height: auto;
+            .taxonomy-category-panel {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .methods-section {
-                min-height: auto;
-                overflow: visible;
+            .taxonomy-method-grid {
+                grid-template-columns: repeat(2, minmax(180px, 1fr));
             }
 
             header {
@@ -748,8 +994,12 @@
                 padding: 28px 24px;
             }
 
-            .chart-container {
-                min-height: 420px;
+            .taxonomy-toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .taxonomy-toolbar button {
+                grid-column: 1 / -1;
             }
 
             .bibtex-block {
@@ -924,40 +1174,30 @@
                 margin-top: 18px;
             }
 
-            .chart-section,
-            .methods-section {
-                padding: 18px;
-                border-radius: 16px;
+            .taxonomy-rule,
+            .taxonomy-toolbar {
+                grid-template-columns: 1fr;
             }
 
-            .chart-title {
-                font-size: 1.15rem;
-                margin-bottom: 12px;
+            .taxonomy-toolbar button {
+                grid-column: auto;
             }
 
-            .chart-container {
-                min-height: 320px;
-                padding: 12px;
+            .taxonomy-graph-shell {
+                padding: 16px 12px;
             }
 
-            .methods-section {
-                max-height: none;
+            .taxonomy-category-panel,
+            .taxonomy-method-grid {
+                grid-template-columns: 1fr;
             }
 
-            .method-list {
-                gap: 8px;
+            .taxonomy-method-panel {
+                max-height: 780px;
             }
 
-            .method-item {
-                width: 100%;
-                border-radius: 14px;
-                padding: 10px 12px;
-                font-size: 0.92rem;
-            }
-
-            .back-button {
-                width: 100%;
-                margin-bottom: 12px;
+            .taxonomy-reviewer-examples::before {
+                flex-basis: 100%;
             }
 
             .bibtex-block {
@@ -987,8 +1227,9 @@
                 width: 100%;
             }
 
-            .chart-container {
-                min-height: 280px;
+            .taxonomy-rule-card,
+            .taxonomy-detail-panel {
+                padding: 14px;
             }
         }
 
@@ -1122,24 +1363,52 @@
 
         <div id="taxonomy" class="page">
             <div class="section">
-                <h2>Interactive Taxonomy</h2>
+                <h2>Complete Interactive Taxonomy</h2>
                 <p class="lead">
-                    The survey organizes feed-forward 3D methods by the core problems they solve rather than only by representation.
+                    This living graph complements the paper figure by listing every method in the survey taxonomy. Unlike a tree, the graph
+                    allows one method to connect to every challenge branch that it substantively addresses.
                 </p>
 
-                <div class="taxonomy-container">
-                    <div class="chart-section">
-                        <button id="backButton" class="back-button" style="display: none;">← Back</button>
-                        <div class="chart-title" id="chartTitle">Research Directions</div>
-                        <div class="chart-container">
-                            <canvas id="taxonomyChart"></canvas>
+                <div class="taxonomy-rule" aria-label="Taxonomy membership rule">
+                    <div class="taxonomy-rule-card">
+                        <strong>Multi-axis membership.</strong> Categories are not ranked as primary or secondary. A method has one edge for
+                        every challenge branch in which it makes a substantive technical contribution.
+                    </div>
+                    <div class="taxonomy-rule-card">
+                        <strong>Evidence rule.</strong> The paper taxonomy supplies the initial edge; additional edges require substantive
+                        discussion in another Section 4 branch. Incidental citations as a baseline or predecessor do not create an edge.
+                    </div>
+                </div>
+
+                <div class="taxonomy-toolbar" role="search">
+                    <input id="taxonomySearch" type="search" placeholder="Search all methods, branches, or contributions" aria-label="Search taxonomy">
+                    <select id="taxonomyDirectionFilter" aria-label="Filter by category membership">
+                        <option value="all">All category memberships</option>
+                    </select>
+                    <button id="taxonomyCrossButton" type="button" aria-pressed="false">Show cross-category only</button>
+                </div>
+                <p class="taxonomy-status" id="taxonomyStatus" aria-live="polite"></p>
+
+                <div class="taxonomy-graph-shell">
+                    <div class="taxonomy-root-node">Feed-Forward 3D Scene Modeling <span>many-to-many category graph</span></div>
+                    <div class="taxonomy-reviewer-examples" id="taxonomyExamples" aria-label="Cross-category examples highlighted by the reviewer"></div>
+                    <div class="taxonomy-network" id="taxonomyNetwork">
+                        <svg class="taxonomy-edge-layer" id="taxonomyEdges" aria-hidden="true"></svg>
+                        <div class="taxonomy-category-panel" id="taxonomyCategories" aria-label="Challenge category nodes"></div>
+                        <div class="taxonomy-method-panel">
+                            <div class="taxonomy-method-grid" id="taxonomyMethods" aria-label="Method nodes"></div>
                         </div>
                     </div>
-                    <div class="methods-section" id="methodsPanel"></div>
                 </div>
+
+                <aside class="taxonomy-detail-panel" id="taxonomyDetail" aria-live="polite">
+                    <h3>Explore the graph</h3>
+                    <p class="muted">Select a category to highlight every connected method, or select a method to reveal all of its category edges.</p>
+                </aside>
+
                 <div class="image-card taxonomy-static">
-                    <img src="assets/taxonomy.png" alt="Taxonomy">
-                    <p class="caption">Problem-driven taxonomy of feed-forward 3D scene modeling.</p>
+                    <img src="assets/taxonomy.png" alt="Representative taxonomy from the paper">
+                    <p class="caption">The paper figure shows representative methods; the interactive graph above maintains the complete classification.</p>
                 </div>
             </div>
         </div>
@@ -1178,7 +1447,7 @@
                     </div>
                     <div class="summary-card">
                         <h4>Temporal-aware Models</h4>
-                        <p class="muted">Representative methods: StreamSplat, CUT3R, Stream3R, LongStream, MonST3R, 4DGT, MoVieS, DAS3R.</p>
+                        <p class="muted">Representative methods: StreamSplat (Wu et al.; uncalibrated dynamic video), StreamSplat (Song et al.; streaming feed-forward 3DGS), CUT3R, Stream3R, LongStream, MonST3R, 4DGT, MoVieS, DAS3R.</p>
                     </div>
                 </div>
             </div>
@@ -1402,6 +1671,9 @@
         });
 
         const resourceLinks = window.resourceLinks || {};
+        const resourceAliases = {
+            'StreamSplat (Wu et al.; uncalibrated dynamic video)': 'StreamSplat'
+        };
         const normalizedResourceLinks = Object.fromEntries(
             Object.entries(resourceLinks).map(([name, url]) => [normalizeResourceKey(name), url])
         );
@@ -1420,7 +1692,8 @@
         }
 
         function getResourceLink(name) {
-            return resourceLinks[name] || normalizedResourceLinks[normalizeResourceKey(name)] || null;
+            const canonicalName = resourceAliases[name] || name;
+            return resourceLinks[canonicalName] || normalizedResourceLinks[normalizeResourceKey(canonicalName)] || null;
         }
 
         function renderLinkedLabel(name) {
@@ -1428,10 +1701,6 @@
             const link = getResourceLink(name);
             if (!link) return safeName;
             return `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${safeName}</a>`;
-        }
-
-        function renderMethodChip(name) {
-            return `<div class="method-item">${renderLinkedLabel(name)}</div>`;
         }
 
         function linkifyStaticCardLists() {
@@ -1445,294 +1714,526 @@
             });
         }
 
-        const taxonomyData = {
-            main: {
-                labels: [
-                    'Feature Enhancement',
-                    'Geometry Awareness',
-                    'Model Efficiency',
-                    'Augmentation Strategies',
-                    'Temporal-aware Models'
-                ],
-                data: [59, 51, 15, 9, 19],
-                colors: ['#1e40af', '#e85d5d', '#14b8a6', '#8b5cf6', '#f59e0b']
-            },
-            subcategories: {
-                'Feature Enhancement': {
-                    labels: ['Advanced Encoding Architectures', 'Cross-View Fusion', 'Integration of Visual Foundation Models'],
-                    data: [25, 30, 4],
-                    colors: ['#1e40af', '#4a79df', '#88a9f0'],
-                    subsections: {
-                        'Advanced Encoding Architectures': {
-                            description: 'Backbone and decoder designs that improve implicit feature quality and representation capacity.',
-                            methods: [
-                                'pixelNeRF', 'IBRNet', 'Splatter Image', 'Convolutional Occupancy Networks',
-                                'Light Field Networks', 'Learned Initializations', 'NeuRay', 'C3-GS', 'SRT',
-                                'VisionNeRF', 'RePAST', 'GNT', 'LRM', 'Instant3D', 'TripoSR', 'GRM',
-                                'GS-LRM', 'MeshLRM', 'MeshFormer', 'Flex3D', 'LVSM', 'Depth Anything 3',
-                                'Gamba', 'MVGamba', 'Long-LRM'
-                            ]
-                        },
-                        'Cross-View Fusion': {
-                            description: 'Methods that strengthen multi-view correspondence, memory, and long-context aggregation.',
-                            methods: [
-                                'AttnRend', 'eFreeSplat', 'LGM', 'DUSt3R', 'MASt3R', 'MV-DUSt3R',
-                                'MV-DUSt3R+', 'PreF3R', 'Spann3R', 'Fast3R', 'MUSt3R', 'WinT3R',
-                                'CUT3R', 'VolSplat', 'G-CUT3R', 'TTT3R', 'Point3R', 'VGGT', 'iLRM',
-                                'Dens3r', 'MoRE', 'Uni3R', 'Flow3r', 'Gen3R', 'NOVA3R', 'IncVGGT',
-                                'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3'
-                            ]
-                        },
-                        'Integration of Visual Foundation Models': {
-                            description: 'Methods that inject pre-trained visual or geometric priors into feed-forward reconstruction.',
-                            methods: ['DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat']
-                        }
-                    }
-                },
-                'Geometry Awareness': {
-                    labels: ['Explicit Geometric Aggregation', 'Post Refinement', 'Pose-Free Reconstruction', 'Pre-trained Geometric Guidance'],
-                    data: [24, 6, 15, 6],
-                    colors: ['#e85d5d', '#f08787', '#f6b3b3', '#ffd4d4'],
-                    subsections: {
-                        'Explicit Geometric Aggregation': {
-                            description: 'Methods that impose stronger geometry via cost volumes, correspondences, surfaces, or hybrid structures.',
-                            methods: [
-                                'MVSNeRF', 'SRF', 'GeoNeRF', 'BoostMVSNeRFs', 'GPNR', 'MatchNeRF',
-                                'GTA', 'MuRF', 'SparseNeuS', 'VolRecon', 'ReTR', 'UFORecon',
-                                'SurfaceSplat', 'RenderFormer', 'AGG', 'TGS', 'LaRa', 'MeshSplat',
-                                'TranSplat', 'H3R', 'MuGS', 'pixelSplat', 'MVSplat', 'MVSGaussian'
-                            ]
-                        },
-                        'Post Refinement': {
-                            description: 'Post-refinement methods that densify or improve predicted Gaussian scenes.',
-                            methods: ['FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R']
-                        },
-                        'Pose-Free Reconstruction': {
-                            description: 'Methods that jointly infer geometry and cameras from uncalibrated or unconstrained views.',
-                            methods: [
-                                'LEAP', 'Splatt3R', 'NoPoSplat', 'PF3plat', 'FreeSplatter', 'FLARE',
-                                'Pow3R', 'RegGS', 'UFV-Splatter', 'pi3', 'AnySplat', 'No Pose at All',
-                                'SPFSplatV2', 'PLANA3R', 'YoNoSplat'
-                            ]
-                        },
-                        'Pre-trained Geometric Guidance': {
-                            description: 'Methods that inject monocular depth, normals, or geometry priors from strong teachers.',
-                            methods: ['DepthSplat', 'Flash3D', 'Niagara', 'PM-Loss', 'Fin3R', 'JointSplat']
-                        }
-                    }
-                },
-                'Model Efficiency': {
-                    labels: ['Feature Efficiency', 'Representation Compaction'],
-                    data: [11, 4],
-                    colors: ['#14b8a6', '#6ee7d8'],
-                    subsections: {
-                        'Feature Efficiency': {
-                            description: 'Architectural and systems techniques for faster or lighter feed-forward inference.',
-                            methods: [
-                                'ENeRF', 'ProNeRF', 'TinySplat', 'ZPressor', 'FastVGGT',
-                                'Quantized Visual Geometry Grounded Transformer',
-                                'Faster VGGT with Block-Sparse Global Attention',
-                                'Evict3R', 'LiteVGGT', 'Speed3R', 'SR3R'
-                            ]
-                        },
-                        'Representation Compaction': {
-                            description: 'Methods that reduce redundancy in Gaussian scene representations.',
-                            methods: ['GGN', 'PixelGaussian', 'FreeSplat++', 'LongSplat']
-                        }
-                    }
-                },
-                'Augmentation Strategies': {
-                    labels: ['Data Augmentation', 'Visual Augmentation'],
-                    data: [4, 5],
-                    colors: ['#8b5cf6', '#b794f4'],
-                    subsections: {
-                        'Data Augmentation': {
-                            description: 'Data scaling and multi-view refinement strategies.',
-                            methods: ['MegaSynth', 'Puzzles', 'Aug3D', 'MVBoost']
-                        },
-                        'Visual Augmentation': {
-                            description: 'Methods that use diffusion or generative priors to improve visual fidelity.',
-                            methods: ['MVSplat360', 'latentSplat', 'ProSplat', 'Difix3D+', 'Reconstruct, Inpaint, Finetune']
-                        }
-                    }
-                },
-                'Temporal-aware Models': {
-                    labels: ['Online Streaming', 'Offline Processing', 'Interactive Modeling', 'Specialized Tasks'],
-                    data: [5, 10, 2, 2],
-                    colors: ['#f59e0b', '#f8b84c', '#facc7f', '#fde2b3'],
-                    subsections: {
-                        'Online Streaming': {
-                            description: 'Causal and streaming reconstruction models.',
-                            methods: ['StreamSplat', 'CUT3R', 'DGS-LRM', 'Stream3R', 'LongStream']
-                        },
-                        'Offline Processing': {
-                            description: 'Windowed or batch temporal models for globally consistent 4D reconstruction.',
-                            methods: ['L4GM', '4D-LRM', 'MonST3R', 'Easi3R', '4DGT', 'MoVieS', '4Real-Video-V2', 'MonoFusion', 'EgoMono4D', 'BTimer']
-                        },
-                        'Interactive Modeling': {
-                            description: 'Methods that couple feed-forward reconstruction with physics or interactive editing.',
-                            methods: ['PIXIE', 'PhysGM']
-                        },
-                        'Specialized Tasks': {
-                            description: 'Task-specific temporal pipelines.',
-                            methods: ['DAS3R', 'St4RTrack']
-                        }
-                    }
-                }
-            }
-        };
-
-        let currentChart = null;
-        let currentLevel = 'main';
-        let currentCategory = null;
-
-        const chartConfig = {
-            type: 'pie',
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            padding: 14,
-                            font: {
-                                size: 12,
-                                weight: '700'
-                            },
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
+        const taxonomyDirections = [
+            {
+                name: 'Feature Enhancement',
+                kind: 'Core challenge',
+                color: '#1e40af',
+                subsections: [
+                    {
+                        name: 'Advanced Encoding Architectures',
+                        description: 'Backbone and decoder designs that improve implicit feature quality and representation capacity.',
+                        methods: [
+                            'pixelNeRF', 'IBRNet', 'Splatter Image', 'Convolutional Occupancy Networks',
+                            'Light Field Networks', 'Learned Initializations', 'NeuRay', 'C3-GS', 'SRT',
+                            'VisionNeRF', 'RePAST', 'GNT', 'LRM', 'Instant3D', 'TripoSR', 'GRM',
+                            'GS-LRM', 'MeshLRM', 'MeshFormer', 'Flex3D', 'LVSM', 'Depth Anything 3',
+                            'Gamba', 'MVGamba', 'Long-LRM', 'LGM', 'CATSplat', 'VGGT', 'UniQueR', '2Xplat'
+                        ]
                     },
-                    datalabels: {
-                        color: '#fff',
-                        font: {
-                            weight: 'bold',
-                            size: 13
-                        },
-                        formatter: (value, ctx) => {
-                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return percentage > 4 ? percentage + '%' : '';
-                        }
+                    {
+                        name: 'Cross-View Fusion',
+                        description: 'Methods that strengthen multi-view correspondence, memory, and long-context aggregation.',
+                        methods: [
+                            'AttnRend', 'eFreeSplat', 'LGM', 'DUSt3R', 'MASt3R', 'MV-DUSt3R',
+                            'MV-DUSt3R+', 'PreF3R', 'Spann3R', 'Fast3R', 'MUSt3R', 'WinT3R',
+                            'CUT3R', 'VolSplat', 'G-CUT3R', 'TTT3R', 'Point3R', 'iLRM',
+                            'Dens3r', 'MoRE', 'Uni3R', 'Flow3r', 'Gen3R', 'NOVA3R', 'IncVGGT',
+                            'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3', 'PRoPE', 'TokenSplat', 'FF3R'
+                        ]
+                    },
+                    {
+                        name: 'Integration of Visual Foundation Models',
+                        description: 'Methods that inject pre-trained visual or geometric priors into feed-forward reconstruction.',
+                        methods: ['DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat', 'VGGT', 'FF3R']
                     }
-                },
-                onClick: handleChartClick
+                ]
             },
-            plugins: [ChartDataLabels]
+            {
+                name: 'Geometry Awareness',
+                kind: 'Core challenge',
+                color: '#e85d5d',
+                subsections: [
+                    {
+                        name: 'Explicit Geometric Aggregation',
+                        description: 'Methods that impose stronger geometry via cost volumes, correspondences, surfaces, or hybrid structures.',
+                        methods: [
+                            'MVSNeRF', 'SRF', 'GeoNeRF', 'BoostMVSNeRFs', 'GPNR', 'MatchNeRF',
+                            'GTA', 'MuRF', 'SparseNeuS', 'VolRecon', 'ReTR', 'UFORecon',
+                            'SurfaceSplat', 'RenderFormer', 'AGG', 'TGS', 'LaRa', 'MeshSplat',
+                            'TranSplat', 'H3R', 'MuGS', 'pixelSplat', 'MVSplat', 'MVSGaussian',
+                            'AMB3R', 'GGPT'
+                        ]
+                    },
+                    {
+                        name: 'Post Refinement',
+                        description: 'Post-refinement and robustness methods that densify, correct, or reject unreliable predictions.',
+                        methods: ['FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R', 'RobustVGGT / Outlier View Rejection']
+                    },
+                    {
+                        name: 'Pose-Free Reconstruction',
+                        description: 'Methods that jointly infer geometry and cameras from uncalibrated or unconstrained views.',
+                        methods: [
+                            'LEAP', 'Splatt3R', 'NoPoSplat', 'PF3plat', 'FreeSplatter', 'FLARE',
+                            'Pow3R', 'RegGS', 'UFV-Splatter', 'pi3', 'AnySplat', 'No Pose at All',
+                            'SPFSplatV2', 'PLANA3R', 'YoNoSplat', 'DUSt3R', 'Wid3R', 'CAM3R'
+                        ]
+                    },
+                    {
+                        name: 'Pre-trained Geometric Guidance',
+                        description: 'Methods that inject monocular depth, normals, or geometry priors from strong teachers.',
+                        methods: [
+                            'DepthSplat', 'Flash3D', 'Niagara', 'PM-Loss', 'Fin3R', 'JointSplat', 'AnySplat',
+                            'WorldMirror', 'OmniVGGT', 'Geometric Understanding and Learned Priors'
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'Model Efficiency',
+                kind: 'Core challenge',
+                color: '#14b8a6',
+                subsections: [
+                    {
+                        name: 'Feature Efficiency',
+                        description: 'Architectural and systems techniques for faster or lighter feed-forward inference.',
+                        methods: [
+                            'ENeRF', 'ProNeRF', 'TinySplat', 'ZPressor', 'FastVGGT',
+                            'Quantized Visual Geometry Grounded Transformer',
+                            'Faster VGGT with Block-Sparse Global Attention',
+                            'Evict3R', 'LiteVGGT', 'Speed3R', 'SR3R', 'Long-LRM', 'iLRM', 'ZipMap', 'VGG-T3',
+                            'VGGT-Ω', 'FlashVGGT', 'Diversity-aware View Partitioning', 'Déjà View', 'SAF3R', 'QVGGT'
+                        ]
+                    },
+                    {
+                        name: 'Representation Compaction',
+                        description: 'Methods that reduce redundancy in Gaussian scene representations.',
+                        methods: ['GGN', 'PixelGaussian', 'FreeSplat++', 'LongSplat', 'Long-LRM', 'iLRM']
+                    }
+                ]
+            },
+            {
+                name: 'Augmentation Strategies',
+                kind: 'Core challenge',
+                color: '#8b5cf6',
+                subsections: [
+                    {
+                        name: 'Data Augmentation',
+                        description: 'Data scaling, supervision scaling, and domain adaptation strategies.',
+                        methods: ['MegaSynth', 'Puzzles', 'Aug3D', 'MVBoost', 'Reliev3R', 'Wild3R', 'Wat3R']
+                    },
+                    {
+                        name: 'Visual Augmentation',
+                        description: 'Methods that use diffusion or generative priors to improve visual fidelity.',
+                        methods: [
+                            'MVSplat360', 'latentSplat', 'ProSplat', 'Difix3D+', 'Reconstruct, Inpaint, Finetune',
+                            'G3R', 'TTT3R', 'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3'
+                        ]
+                    }
+                ]
+            },
+            {
+                name: 'Temporal-aware Models',
+                kind: 'Core challenge',
+                color: '#f59e0b',
+                subsections: [
+                    {
+                        name: 'Online Streaming',
+                        description: 'Causal and streaming reconstruction models.',
+                        methods: [
+                            'StreamSplat (Wu et al.; uncalibrated dynamic video)', 'CUT3R', 'DGS-LRM',
+                            'Stream3R', 'LongStream', 'StreamSplat (Song et al.; streaming feed-forward 3DGS)'
+                        ]
+                    },
+                    {
+                        name: 'Offline Processing',
+                        description: 'Windowed or batch temporal models for globally consistent 4D reconstruction.',
+                        methods: [
+                            'L4GM', '4D-LRM', 'MonST3R', 'Easi3R', '4DGT', 'MoVieS', '4Real-Video-V2',
+                            'MonoFusion', 'EgoMono4D', 'BTimer', 'Any4D', 'UFO-4D', '4RC', 'NeoVerse'
+                        ]
+                    },
+                    {
+                        name: 'Interactive Modeling',
+                        description: 'Methods that couple feed-forward reconstruction with physics or interactive editing.',
+                        methods: ['PIXIE', 'PhysGM']
+                    },
+                    {
+                        name: 'Specialized Tasks',
+                        description: 'Task-specific temporal pipelines.',
+                        methods: ['DAS3R', 'St4RTrack']
+                    }
+                ]
+            },
+            {
+                name: 'Applications / Future Directions',
+                kind: 'Supporting track',
+                color: '#64748b',
+                subsections: [
+                    {
+                        name: 'World Models and Video Generation',
+                        description: 'Systems that combine reconstruction with generation, planning, simulation, or long-horizon world modeling.',
+                        methods: ['HY-World 2.0']
+                    },
+                    {
+                        name: 'Persistent Interactive World State',
+                        description: 'Methods that maintain a persistent 3D state for long-horizon interaction.',
+                        methods: ['PERSIST']
+                    }
+                ]
+            }
+        ];
+
+        const recentMethodMetadata = {
+            'VGGT-Ω': { arxiv: '2605.15195', bibKey: 'wang2026vggtomega', contribution: 'Uses register-only cross-frame attention and a unified dense head to reduce computation and training memory while retaining patch tokens.' },
+            'WorldMirror': { arxiv: '2510.10726', bibKey: 'liu2025worldmirror', contribution: 'Accepts arbitrary pose, intrinsics, and depth priors and jointly predicts cameras, depth, point maps, normals, and 3D Gaussians.' },
+            'AMB3R': { arxiv: '2511.20343', bibKey: 'wang2025amb3r', contribution: 'Fuses point-map features in a compact sparse volumetric backend for metric-scale reconstruction and transfer to VO and SfM.' },
+            'Any4D': { arxiv: '2512.10935', bibKey: 'karhade2025any4d', contribution: 'Predicts metric-scale dense 4D geometry and motion while supporting optional RGB-D, IMU, and radar inputs.' },
+            'HY-World 2.0': { arxiv: '2604.14268', bibKey: 'team2026hyworld', contribution: 'Combines panoramic generation, trajectory planning, persistent expansion, WorldMirror 2.0 reconstruction, and interactive rendering.' },
+            'PERSIST': { arxiv: '2603.03482', bibKey: 'garcin2026persist', contribution: 'Maintains a continually updated latent 3D scene state for long-range spatial memory and geometric consistency.' },
+            'FlashVGGT': { arxiv: '2512.01540', bibKey: 'wang2025flashvggt', contribution: 'Replaces dense all-token global attention with compressed descriptor attention and a recursive cache for long sequences.' },
+            'PRoPE': { arxiv: '2507.10496', bibKey: 'li2025prope', contribution: 'Encodes complete camera frustums as attention-level relative positional information for cross-view geometric reasoning.' },
+            'GGPT': { arxiv: '2603.11174', bibKey: 'chen2026ggpt', contribution: 'Uses lightweight SfM to obtain reliable sparse geometry and propagates it into dense point maps with a 3D point transformer.' },
+            'UniQueR': { arxiv: '2603.22851', bibKey: 'peng2026uniquer', contribution: 'Uses sparse global 3D queries instead of pixel-aligned 2.5D outputs to recover visible and occluded structure.' },
+            'Wid3R': { arxiv: '2602.05321', bibKey: 'jung2026wid3r', contribution: 'Combines spherical-harmonic ray encoding with camera-model tokens for pinhole, fisheye, and spherical imagery.' },
+            'Reliev3R': { arxiv: '2604.00548', bibKey: 'chen2026reliev3r', contribution: 'Uses zero-shot monocular relative depth and sparse correspondences in place of expensive multi-view labels and SfM preprocessing.' },
+            'UFO-4D': { arxiv: '2602.24290', bibKey: 'hur2026ufo4d', contribution: 'Predicts dynamic 3D Gaussians, motion, cameras, and appearance directly from two unposed images.' },
+            '4RC': { arxiv: '2602.10094', bibKey: 'luo20264rc', contribution: 'Encodes a video once into a spatiotemporal latent that can be queried for geometry and motion at arbitrary frames and times.' },
+            'TokenSplat': { arxiv: '2603.00697', bibKey: 'li2026tokensplat', contribution: 'Aligns cross-view tokens before Gaussian prediction and combines confidence and camera tokens to suppress redundant Gaussians.' },
+            '2Xplat': { arxiv: '2603.21064', bibKey: 'jeong20262xplat', contribution: 'Decouples geometry and camera estimation from Gaussian appearance generation with a two-expert architecture.' },
+            'CAM3R': { arxiv: '2603.22631', bibKey: 'guruprasad2026cam3r', contribution: 'Separates per-pixel ray estimation from radial-distance inference for calibration-free wide-angle reconstruction.' },
+            'Diversity-aware View Partitioning': { arxiv: '2607.01885', bibKey: 'park2026viewpartition', contribution: 'Partitions views by visual difference and spatial diversity to reduce redundant VGGT computation and memory without retraining.' },
+            'Déjà View': { arxiv: '2605.30215', bibKey: 'burzio2026dejaview', contribution: 'Reuses one transformer block recurrently, trading iteration count for inference compute while reducing independent parameters.' },
+            'SAF3R': { arxiv: '2607.03612', bibKey: 'deng2026saf3r', contribution: 'Combines offline head profiling with online adaptation for training-free dynamic sparse global attention.' },
+            'QVGGT': { arxiv: '2605.31124', bibKey: 'pan2026qvggt', contribution: 'Applies sensitivity-aware mixed precision, token filtering, and task-aware scale search for post-training VGGT quantization.' },
+            'FF3R': { arxiv: '2604.09862', bibKey: 'zhou2026ff3r', contribution: 'Jointly learns semantic-geometric fusion, cameras, and Gaussian features using only RGB and feature-rendering supervision.' },
+            'Geometric Understanding and Learned Priors': { arxiv: '2512.11508', bibKey: 'bratulic2025geometrypriors', contribution: 'Probes DUSt3R, VGGT, and DA3 representations to reveal attention correspondences and emergent epipolar geometry.' },
+            'NeoVerse': { arxiv: '2601.00393', bibKey: 'yang2026neoverse', contribution: 'Learns pose-free 4D reconstruction and novel-trajectory generation from in-the-wild monocular video.' },
+            'Wild3R': { arxiv: '2606.11894', bibKey: 'furutani2026wild3r', contribution: 'Trains in-the-wild feed-forward 3D Gaussian reconstruction with multi-illumination data and transient objects from WildCity.' },
+            'OmniVGGT': { arxiv: '2511.10560', bibKey: 'peng2025omnivggt', contribution: 'Uses a GeoAdapter and randomized modality combinations to inject arbitrary depth, intrinsics, and extrinsics into VGGT.' },
+            'RobustVGGT / Outlier View Rejection': { arxiv: '2512.04012', bibKey: 'han2025outlierrejection', contribution: 'Exploits an emergent outlier-suppressing VGGT layer to reject unrelated, non-overlapping input views.' },
+            'Wat3R': { arxiv: '2607.08772', bibKey: 'ren2026wat3r', contribution: 'Uses teacher-student learning and cross-view consistency to adapt feed-forward reconstruction to unlabeled underwater video.' },
+            'StreamSplat (Song et al.; streaming feed-forward 3DGS)': { arxiv: '2608.01659', bibKey: 'song2026streamsplat', contribution: 'Uses a voxel-aligned causal cache that scales with explored geometry rather than sequence length for online 3D Gaussian reconstruction.' }
         };
 
-        function createChart(data) {
-            const ctx = document.getElementById('taxonomyChart').getContext('2d');
-            const compactViewport = isCompactViewport();
-            return new Chart(ctx, {
-                ...chartConfig,
-                options: {
-                    ...chartConfig.options,
-                    plugins: {
-                        ...chartConfig.options.plugins,
-                        legend: {
-                            ...chartConfig.options.plugins.legend,
-                            labels: {
-                                ...chartConfig.options.plugins.legend.labels,
-                                padding: compactViewport ? 10 : 14,
-                                font: {
-                                    size: compactViewport ? 11 : 12,
-                                    weight: '700'
-                                }
-                            }
-                        },
-                        datalabels: {
-                            ...chartConfig.options.plugins.datalabels,
-                            font: {
-                                weight: 'bold',
-                                size: compactViewport ? 11 : 13
-                            }
-                        }
-                    }
-                },
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        data: data.data,
-                        backgroundColor: data.colors,
-                        borderColor: '#fff',
-                        borderWidth: 3
-                    }]
-                }
-            });
+        function categoryKey(category) {
+            return `${category.direction}\u0000${category.subsection}`;
         }
 
-        function showMainChart() {
-            currentLevel = 'main';
-            currentCategory = null;
-            document.getElementById('backButton').style.display = 'none';
-            document.getElementById('chartTitle').textContent = 'Research Directions';
-            if (currentChart) currentChart.destroy();
-            currentChart = createChart(taxonomyData.main);
-            document.getElementById('methodsPanel').innerHTML = `
-                <h3>About This Taxonomy</h3>
-                <p class="muted">Click a category in the chart to inspect its subcategories and representative methods.</p>
+        function buildTaxonomyRecords() {
+            const categories = [];
+            const assignmentsByMethod = new Map();
+
+            taxonomyDirections.forEach((direction) => {
+                direction.subsections.forEach((subsection) => {
+                    const category = {
+                        index: categories.length,
+                        direction: direction.name,
+                        kind: direction.kind,
+                        color: direction.color,
+                        subsection: subsection.name,
+                        description: subsection.description,
+                        methods: [...new Set(subsection.methods)]
+                    };
+                    categories.push(category);
+
+                    category.methods.forEach((name) => {
+                        if (!assignmentsByMethod.has(name)) assignmentsByMethod.set(name, []);
+                        assignmentsByMethod.get(name).push(category);
+                    });
+                });
+            });
+
+            const methods = Array.from(assignmentsByMethod, ([name, categoriesForMethod]) => ({
+                name,
+                categories: categoriesForMethod,
+                metadata: recentMethodMetadata[name] || null,
+                link: getResourceLink(name)
+            }));
+            return { categories, methods };
+        }
+
+        const taxonomyRecords = buildTaxonomyRecords();
+        const categoryRecords = taxonomyRecords.categories;
+        const methodRecords = taxonomyRecords.methods;
+        const methodRecordByName = new Map(methodRecords.map((record) => [record.name, record]));
+        const reviewerExampleNames = ['GGN', 'PixelGaussian', 'DUSt3R'];
+        let taxonomyCrossOnly = false;
+        let taxonomySelection = { type: 'method', index: methodRecords.findIndex((record) => record.name === 'DUSt3R') };
+
+        function recordMatches(record, query, directionFilter) {
+            if (taxonomyCrossOnly && record.categories.length < 2) return false;
+            if (directionFilter !== 'all' && !record.categories.some((item) => item.direction === directionFilter)) return false;
+            if (!query) return true;
+
+            const searchable = [
+                record.name,
+                ...record.categories.flatMap((item) => [item.direction, item.subsection]),
+                record.metadata?.contribution || '',
+                record.metadata?.arxiv || ''
+            ].join(' ').toLowerCase();
+            return searchable.includes(query);
+        }
+
+        function renderMethodNode(record, index) {
+            const resourceLink = record.link
+                ? `<a class="taxonomy-method-link" href="${escapeHtml(record.link)}" target="_blank" rel="noopener noreferrer" aria-label="Open resource for ${escapeHtml(record.name)}">↗</a>`
+                : '';
+            const addition = record.metadata ? ' · new' : '';
+            return `
+                <article class="taxonomy-method-node${record.categories.length > 1 ? ' is-cross-category' : ''}" data-method-index="${index}">
+                    <button class="taxonomy-method-button" type="button" data-method-index="${index}" aria-label="Show all category connections for ${escapeHtml(record.name)}">
+                        <span class="taxonomy-method-name">${escapeHtml(record.name)}</span>
+                        <span class="taxonomy-membership-count">${record.categories.length} ${record.categories.length === 1 ? 'category' : 'categories'}${addition}</span>
+                    </button>
+                    ${resourceLink}
+                </article>
             `;
         }
 
-        function showSubcategories(category) {
-            currentLevel = 'subcategory';
-            currentCategory = category;
-            const subData = taxonomyData.subcategories[category];
-            document.getElementById('backButton').style.display = 'inline-block';
-            document.getElementById('chartTitle').textContent = category;
-            if (currentChart) currentChart.destroy();
-            currentChart = createChart({
-                labels: subData.labels,
-                data: subData.data,
-                colors: subData.colors
-            });
-
-            let html = `<h3>${category}</h3>`;
-            subData.labels.forEach(label => {
-                const block = subData.subsections[label];
-                html += `
-                    <div class="subsection-item">
-                        <h4>${label}</h4>
-                        <p class="muted">${block.description}</p>
-                        <div class="method-list">
-                            ${block.methods.map(renderMethodChip).join('')}
+        function renderCategoryPanel(matchingRecords) {
+            const visibleNames = new Set(matchingRecords.map((record) => record.name));
+            document.getElementById('taxonomyCategories').innerHTML = taxonomyDirections.map((direction) => {
+                const nodes = categoryRecords
+                    .filter((category) => category.direction === direction.name)
+                    .map((category) => {
+                        const connected = category.methods.filter((name) => visibleNames.has(name)).length;
+                        return `
+                            <button class="taxonomy-category-button" type="button" data-category-index="${category.index}" style="--direction-color: ${category.color}" aria-label="Highlight ${escapeHtml(category.subsection)} methods">
+                                <span>${escapeHtml(category.subsection)}</span>
+                                <span>${connected}/${category.methods.length}</span>
+                            </button>
+                        `;
+                    }).join('');
+                return `
+                    <section class="taxonomy-category-group" style="--direction-color: ${direction.color}">
+                        <div class="taxonomy-category-heading">
+                            <span>${escapeHtml(direction.name)}</span>
+                            <span>${escapeHtml(direction.kind)}</span>
                         </div>
-                    </div>
+                        <div class="taxonomy-category-nodes">${nodes}</div>
+                    </section>
                 `;
+            }).join('');
+        }
+
+        function renderReviewerExamples() {
+            const container = document.getElementById('taxonomyExamples');
+            container.innerHTML = reviewerExampleNames.map((name) => {
+                const index = methodRecords.findIndex((record) => record.name === name);
+                const record = methodRecords[index];
+                const branchNames = record.categories.map((category) => category.subsection).join(' ↔ ');
+                return `<button class="taxonomy-example-button" type="button" data-method-index="${index}">${escapeHtml(name)} · ${escapeHtml(branchNames)}</button>`;
+            }).join('');
+            container.querySelectorAll('.taxonomy-example-button').forEach((button) => {
+                button.addEventListener('click', () => selectMethod(Number(button.dataset.methodIndex)));
             });
-            document.getElementById('methodsPanel').innerHTML = html;
-            scrollElementIntoViewOnMobile(document.getElementById('methodsPanel'));
         }
 
-        function showMethods(category, subsection) {
-            const block = taxonomyData.subcategories[category].subsections[subsection];
-            document.getElementById('methodsPanel').innerHTML = `
-                <h3>${subsection}</h3>
-                <p class="muted">${block.description}</p>
-                <div class="method-list">
-                    ${block.methods.map(renderMethodChip).join('')}
-                </div>
-            `;
-            scrollElementIntoViewOnMobile(document.getElementById('methodsPanel'));
+        function renderTaxonomyGraph() {
+            const query = document.getElementById('taxonomySearch').value.trim().toLowerCase();
+            const directionFilter = document.getElementById('taxonomyDirectionFilter').value;
+            const exampleRank = new Map(reviewerExampleNames.map((name, index) => [name, index]));
+            const matchingRecords = methodRecords
+                .filter((record) => recordMatches(record, query, directionFilter))
+                .sort((left, right) => {
+                    const leftRank = exampleRank.has(left.name) ? exampleRank.get(left.name) : Number.POSITIVE_INFINITY;
+                    const rightRank = exampleRank.has(right.name) ? exampleRank.get(right.name) : Number.POSITIVE_INFINITY;
+                    if (leftRank !== rightRank) return leftRank - rightRank;
+                    if ((left.categories.length > 1) !== (right.categories.length > 1)) return left.categories.length > 1 ? -1 : 1;
+                    return left.name.localeCompare(right.name);
+                });
+            const matchingIndexes = new Set(matchingRecords.map((record) => methodRecords.indexOf(record)));
+
+            renderCategoryPanel(matchingRecords);
+            document.getElementById('taxonomyMethods').innerHTML = matchingRecords.length
+                ? matchingRecords.map((record) => renderMethodNode(record, methodRecords.indexOf(record))).join('')
+                : '<p class="muted">No methods match this filter.</p>';
+
+            document.querySelectorAll('.taxonomy-method-button').forEach((button) => {
+                button.addEventListener('click', () => selectMethod(Number(button.dataset.methodIndex)));
+            });
+            document.querySelectorAll('.taxonomy-category-button').forEach((button) => {
+                button.addEventListener('click', () => selectCategory(Number(button.dataset.categoryIndex)));
+            });
+
+            if (taxonomySelection?.type === 'method' && !matchingIndexes.has(taxonomySelection.index)) taxonomySelection = null;
+            applyTaxonomySelection();
+
+            const recentVisible = matchingRecords.filter((record) => record.metadata).length;
+            const crossTotal = methodRecords.filter((record) => record.categories.length > 1).length;
+            document.getElementById('taxonomyStatus').textContent =
+                `Showing ${matchingRecords.length} of ${methodRecords.length} methods · ${crossTotal} cross-category methods · ${recentVisible} recent additions in view.`;
         }
 
-        function handleChartClick(event, elements) {
-            if (!elements.length) return;
-            const index = elements[0].index;
-            const label = event.chart.data.labels[index];
-            if (currentLevel === 'main') {
-                showSubcategories(label);
-            } else if (currentLevel === 'subcategory') {
-                showMethods(currentCategory, label);
+        function selectMethod(index) {
+            taxonomySelection = { type: 'method', index };
+            const record = methodRecords[index];
+            const methodNode = document.querySelector(`.taxonomy-method-node[data-method-index="${index}"]`);
+            methodNode?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+            showMethodDetails(record);
+            requestAnimationFrame(applyTaxonomySelection);
+        }
+
+        function selectCategory(index) {
+            taxonomySelection = { type: 'category', index };
+            const category = categoryRecords[index];
+            const firstConnectedName = category.methods.find((name) =>
+                document.querySelector(`.taxonomy-method-node[data-method-index="${methodRecords.findIndex((record) => record.name === name)}"]`)
+            );
+            if (firstConnectedName) {
+                const methodIndex = methodRecords.findIndex((record) => record.name === firstConnectedName);
+                document.querySelector(`.taxonomy-method-node[data-method-index="${methodIndex}"]`)
+                    ?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
             }
+            showCategoryDetails(category);
+            requestAnimationFrame(applyTaxonomySelection);
         }
 
-        document.getElementById('backButton').addEventListener('click', showMainChart);
+        function applyTaxonomySelection() {
+            const network = document.getElementById('taxonomyNetwork');
+            network.classList.toggle('has-selection', Boolean(taxonomySelection));
+            document.querySelectorAll('.taxonomy-method-node, .taxonomy-category-button').forEach((node) => {
+                node.classList.remove('is-selected', 'is-connected');
+            });
+            if (!taxonomySelection) {
+                drawTaxonomyEdges([]);
+                return;
+            }
+
+            if (taxonomySelection.type === 'method') {
+                const record = methodRecords[taxonomySelection.index];
+                const methodNode = document.querySelector(`.taxonomy-method-node[data-method-index="${taxonomySelection.index}"]`);
+                if (!record || !methodNode) return;
+                methodNode.classList.add('is-selected');
+                const edges = record.categories.map((category) => {
+                    const categoryNode = document.querySelector(`.taxonomy-category-button[data-category-index="${category.index}"]`);
+                    categoryNode?.classList.add('is-connected');
+                    return { categoryNode, methodNode, color: category.color };
+                });
+                requestAnimationFrame(() => drawTaxonomyEdges(edges));
+                return;
+            }
+
+            const category = categoryRecords[taxonomySelection.index];
+            const categoryNode = document.querySelector(`.taxonomy-category-button[data-category-index="${taxonomySelection.index}"]`);
+            categoryNode?.classList.add('is-selected');
+            const edges = category.methods.map((name) => {
+                const methodIndex = methodRecords.findIndex((record) => record.name === name);
+                const methodNode = document.querySelector(`.taxonomy-method-node[data-method-index="${methodIndex}"]`);
+                methodNode?.classList.add('is-connected');
+                return { categoryNode, methodNode, color: category.color };
+            });
+            requestAnimationFrame(() => drawTaxonomyEdges(edges));
+        }
+
+        function drawTaxonomyEdges(edges) {
+            const network = document.getElementById('taxonomyNetwork');
+            const svg = document.getElementById('taxonomyEdges');
+            const panel = document.querySelector('.taxonomy-method-panel');
+            const networkRect = network.getBoundingClientRect();
+            const panelRect = panel.getBoundingClientRect();
+            svg.setAttribute('viewBox', `0 0 ${network.clientWidth} ${network.clientHeight}`);
+
+            svg.innerHTML = edges.filter(({ categoryNode, methodNode }) => {
+                if (!categoryNode || !methodNode) return false;
+                const methodRect = methodNode.getBoundingClientRect();
+                return methodRect.bottom >= panelRect.top && methodRect.top <= panelRect.bottom;
+            }).map(({ categoryNode, methodNode, color }) => {
+                const categoryRect = categoryNode.getBoundingClientRect();
+                const methodRect = methodNode.getBoundingClientRect();
+                const stacked = window.matchMedia('(max-width: 980px)').matches;
+                let path;
+                if (stacked) {
+                    const startX = categoryRect.left + categoryRect.width / 2 - networkRect.left;
+                    const startY = categoryRect.bottom - networkRect.top;
+                    const endX = methodRect.left + methodRect.width / 2 - networkRect.left;
+                    const endY = methodRect.top - networkRect.top;
+                    const controlY = startY + (endY - startY) / 2;
+                    path = `M ${startX} ${startY} C ${startX} ${controlY}, ${endX} ${controlY}, ${endX} ${endY}`;
+                } else {
+                    const startX = categoryRect.right - networkRect.left;
+                    const startY = categoryRect.top + categoryRect.height / 2 - networkRect.top;
+                    const endX = methodRect.left - networkRect.left;
+                    const endY = methodRect.top + methodRect.height / 2 - networkRect.top;
+                    const controlX = startX + (endX - startX) / 2;
+                    path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`;
+                }
+                return `<path class="taxonomy-edge" style="stroke:${color}" d="${path}"></path>`;
+            }).join('');
+        }
+
+        function showMethodDetails(record) {
+            if (!record) return;
+            const memberships = record.categories
+                .map((item) => `${escapeHtml(item.direction)} → ${escapeHtml(item.subsection)}`)
+                .join('; ');
+            const metadata = record.metadata;
+            const contribution = metadata?.contribution || 'This method is included in the complete taxonomy graph; select any connected category to inspect its peer methods.';
+            const identifiers = metadata
+                ? `<p><strong>Identifier:</strong> arXiv ${escapeHtml(metadata.arxiv)} · BibTeX key <code>${escapeHtml(metadata.bibKey)}</code></p>`
+                : '';
+            const resource = record.link
+                ? `<p><a href="${escapeHtml(record.link)}" target="_blank" rel="noopener noreferrer">Open project or paper page ↗</a></p>`
+                : '<p class="muted">No external resource link is currently registered.</p>';
+            document.getElementById('taxonomyDetail').innerHTML = `
+                <h3>${escapeHtml(record.name)}</h3>
+                <p>${escapeHtml(contribution)}</p>
+                <p><strong>Category memberships (${record.categories.length}):</strong> ${memberships}</p>
+                ${identifiers}
+                ${resource}
+            `;
+            scrollElementIntoViewOnMobile(document.getElementById('taxonomyDetail'));
+        }
+
+        function showCategoryDetails(category) {
+            document.getElementById('taxonomyDetail').innerHTML = `
+                <h3>${escapeHtml(category.direction)} → ${escapeHtml(category.subsection)}</h3>
+                <p>${escapeHtml(category.description)}</p>
+                <p><strong>${category.methods.length} connected methods.</strong> Cross-category nodes remain connected to every other substantive branch.</p>
+            `;
+        }
+
+        function toggleCrossCategoryFilter() {
+            taxonomyCrossOnly = !taxonomyCrossOnly;
+            const button = document.getElementById('taxonomyCrossButton');
+            button.setAttribute('aria-pressed', String(taxonomyCrossOnly));
+            button.textContent = taxonomyCrossOnly ? 'Show all methods' : 'Show cross-category only';
+            renderTaxonomyGraph();
+        }
+
+        function initializeTaxonomy() {
+            const directionFilter = document.getElementById('taxonomyDirectionFilter');
+            taxonomyDirections.forEach((direction) => {
+                const option = document.createElement('option');
+                option.value = direction.name;
+                option.textContent = `${direction.name} (${direction.kind})`;
+                directionFilter.appendChild(option);
+            });
+
+            renderReviewerExamples();
+            document.getElementById('taxonomySearch').addEventListener('input', renderTaxonomyGraph);
+            directionFilter.addEventListener('change', renderTaxonomyGraph);
+            document.getElementById('taxonomyCrossButton').addEventListener('click', toggleCrossCategoryFilter);
+            document.querySelector('.taxonomy-method-panel').addEventListener('scroll', applyTaxonomySelection, { passive: true });
+            window.addEventListener('resize', applyTaxonomySelection, { passive: true });
+            renderTaxonomyGraph();
+            selectMethod(methodRecords.findIndex((record) => record.name === 'DUSt3R'));
+
+            window.taxonomyAudit = {
+                methodCount: methodRecords.length,
+                assignmentCount: methodRecords.reduce((total, record) => total + record.categories.length, 0),
+                crossCategoryMethodCount: methodRecords.filter((record) => record.categories.length > 1).length,
+                recentMethodCount: methodRecords.filter((record) => record.metadata).length,
+                coreDirectionCount: taxonomyDirections.filter((direction) => direction.kind === 'Core challenge').length,
+                supportingTrackCount: taxonomyDirections.filter((direction) => direction.kind === 'Supporting track').length,
+                reviewerExamples: Object.fromEntries(reviewerExampleNames.map((name) => [name, methodRecordByName.get(name).categories.map(categoryKey)])),
+                methodsWithoutLinks: methodRecords.filter((record) => !record.link).map((record) => record.name)
+            };
+        }
+
         linkifyStaticCardLists();
-        showMainChart();
+        initializeTaxonomy();
     </script>
 </body>
 </html>
