@@ -573,24 +573,6 @@
             word-break: break-word;
         }
 
-        .taxonomy-rule {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            margin: 20px 0;
-        }
-
-        .taxonomy-rule-card {
-            background: #f8fbff;
-            border: 1px solid var(--slate-200);
-            border-radius: 16px;
-            padding: 16px 18px;
-        }
-
-        .taxonomy-rule-card strong {
-            color: var(--blue-900);
-        }
-
         .taxonomy-toolbar {
             display: grid;
             grid-template-columns: minmax(220px, 1fr) minmax(190px, 0.45fr) auto;
@@ -708,6 +690,11 @@
             opacity: 0.62;
         }
 
+        .taxonomy-edge.is-overview {
+            stroke-width: 1.35;
+            opacity: 0.18;
+        }
+
         .taxonomy-category-panel,
         .taxonomy-method-panel {
             position: relative;
@@ -795,6 +782,39 @@
             border: 1px solid var(--slate-200);
             border-radius: 16px;
             padding: 14px;
+        }
+
+        .taxonomy-method-groups {
+            display: grid;
+            gap: 18px;
+        }
+
+        .taxonomy-method-group {
+            --group-color: var(--blue-700);
+            border: 1px solid var(--slate-200);
+            border-left: 4px solid var(--group-color);
+            border-radius: 13px;
+            background: #f8fbff;
+            padding: 12px;
+        }
+
+        .taxonomy-method-group-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+            color: var(--slate-900);
+        }
+
+        .taxonomy-method-group-header h4 {
+            font-size: 0.95rem;
+        }
+
+        .taxonomy-method-group-header span {
+            color: var(--slate-500);
+            font-size: 0.72rem;
+            font-weight: 700;
         }
 
         .taxonomy-method-grid {
@@ -949,6 +969,14 @@
                 grid-template-columns: repeat(2, minmax(180px, 1fr));
             }
 
+            .taxonomy-toolbar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .taxonomy-toolbar button {
+                grid-column: 1 / -1;
+            }
+
             header {
                 min-height: 500px;
                 padding: 60px 24px 72px;
@@ -965,14 +993,6 @@
 
             .section {
                 padding: 28px 24px;
-            }
-
-            .taxonomy-toolbar {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .taxonomy-toolbar button {
-                grid-column: 1 / -1;
             }
 
             .bibtex-block {
@@ -1147,7 +1167,6 @@
                 margin-top: 18px;
             }
 
-            .taxonomy-rule,
             .taxonomy-toolbar {
                 grid-template-columns: 1fr;
             }
@@ -1334,20 +1353,8 @@
             <div class="section">
                 <h2>Complete Interactive Taxonomy</h2>
                 <p class="lead">
-                    This living graph complements the paper figure by listing every method in the survey taxonomy. Unlike a tree, the graph
-                    allows one method to connect to every challenge branch that it substantively addresses.
+                    Categories are not ranked. Each method links to every branch it substantively addresses; the paper taxonomy supplies the initial link, while incidental baseline or predecessor citations do not create an edge.
                 </p>
-
-                <div class="taxonomy-rule" aria-label="Taxonomy membership rule">
-                    <div class="taxonomy-rule-card">
-                        <strong>Multi-axis membership.</strong> Categories are not ranked as primary or secondary. A method has one edge for
-                        every challenge branch in which it makes a substantive technical contribution.
-                    </div>
-                    <div class="taxonomy-rule-card">
-                        <strong>Evidence rule.</strong> The paper taxonomy supplies the initial edge; additional edges require substantive
-                        discussion in another Section 4 branch. Incidental citations as a baseline or predecessor do not create an edge.
-                    </div>
-                </div>
 
                 <div class="taxonomy-toolbar" role="search">
                     <input id="taxonomySearch" type="search" placeholder="Search all methods, branches, or contributions" aria-label="Search taxonomy">
@@ -1364,7 +1371,7 @@
                         <svg class="taxonomy-edge-layer" id="taxonomyEdges" aria-hidden="true"></svg>
                         <div class="taxonomy-category-panel" id="taxonomyCategories" aria-label="Challenge category nodes"></div>
                         <div class="taxonomy-method-panel">
-                            <div class="taxonomy-method-grid" id="taxonomyMethods" aria-label="Method nodes"></div>
+                            <div class="taxonomy-method-groups" id="taxonomyMethods" aria-label="Methods grouped in paper order"></div>
                         </div>
                     </div>
                 </div>
@@ -1911,6 +1918,7 @@
             const methods = Array.from(assignmentsByMethod, ([name, categoriesForMethod]) => ({
                 name,
                 categories: categoriesForMethod,
+                displayDirection: categoriesForMethod[0].direction,
                 metadata: recentMethodMetadata[name] || null,
                 link: getResourceLink(name)
             }));
@@ -1982,17 +1990,27 @@
         function renderTaxonomyGraph() {
             const query = document.getElementById('taxonomySearch').value.trim().toLowerCase();
             const directionFilter = document.getElementById('taxonomyDirectionFilter').value;
-            const matchingRecords = methodRecords
-                .filter((record) => recordMatches(record, query, directionFilter))
-                .sort((left, right) => {
-                    if ((left.categories.length > 1) !== (right.categories.length > 1)) return left.categories.length > 1 ? -1 : 1;
-                    return left.name.localeCompare(right.name);
-                });
+            const matchingRecords = methodRecords.filter((record) => recordMatches(record, query, directionFilter));
             const matchingIndexes = new Set(matchingRecords.map((record) => methodRecords.indexOf(record)));
 
             renderCategoryPanel(matchingRecords);
             document.getElementById('taxonomyMethods').innerHTML = matchingRecords.length
-                ? matchingRecords.map((record) => renderMethodNode(record, methodRecords.indexOf(record))).join('')
+                ? taxonomyDirections.map((direction, directionIndex) => {
+                    const groupRecords = matchingRecords.filter((record) => record.displayDirection === direction.name);
+                    if (!groupRecords.length) return '';
+                    const sectionLabel = directionIndex < 5 ? `§4.${directionIndex + 1}` : 'Applications / Future';
+                    return `
+                        <section class="taxonomy-method-group" style="--group-color: ${direction.color}" data-display-direction="${escapeHtml(direction.name)}">
+                            <div class="taxonomy-method-group-header">
+                                <h4>${escapeHtml(sectionLabel)} · ${escapeHtml(direction.name)}</h4>
+                                <span>${groupRecords.length} methods</span>
+                            </div>
+                            <div class="taxonomy-method-grid">
+                                ${groupRecords.map((record) => renderMethodNode(record, methodRecords.indexOf(record))).join('')}
+                            </div>
+                        </section>
+                    `;
+                }).join('')
                 : '<p class="muted">No methods match this filter.</p>';
 
             document.querySelectorAll('.taxonomy-method-button').forEach((button) => {
@@ -2042,7 +2060,16 @@
                 node.classList.remove('is-selected', 'is-connected');
             });
             if (!taxonomySelection) {
-                drawTaxonomyEdges([]);
+                const overviewEdges = methodRecords.flatMap((record, methodIndex) => {
+                    const methodNode = document.querySelector(`.taxonomy-method-node[data-method-index="${methodIndex}"]`);
+                    if (!methodNode || record.categories.length < 2) return [];
+                    return record.categories.slice(1).map((category) => ({
+                        categoryNode: document.querySelector(`.taxonomy-category-button[data-category-index="${category.index}"]`),
+                        methodNode,
+                        color: category.color
+                    }));
+                });
+                requestAnimationFrame(() => drawTaxonomyEdges(overviewEdges, true));
                 return;
             }
 
@@ -2072,7 +2099,7 @@
             requestAnimationFrame(() => drawTaxonomyEdges(edges));
         }
 
-        function drawTaxonomyEdges(edges) {
+        function drawTaxonomyEdges(edges, overview = false) {
             const network = document.getElementById('taxonomyNetwork');
             const svg = document.getElementById('taxonomyEdges');
             const panel = document.querySelector('.taxonomy-method-panel');
@@ -2104,7 +2131,7 @@
                     const controlX = startX + (endX - startX) / 2;
                     path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`;
                 }
-                return `<path class="taxonomy-edge" style="stroke:${color}" d="${path}"></path>`;
+                return `<path class="taxonomy-edge${overview ? ' is-overview' : ''}" style="stroke:${color}" d="${path}"></path>`;
             }).join('');
         }
 
