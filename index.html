@@ -1503,6 +1503,10 @@
 
                 activePage = targetPage;
 
+                if (targetPage === 'taxonomy') {
+                    requestAnimationFrame(applyTaxonomySelection);
+                }
+
                 const activeLink = navLinks.find(link => link.getAttribute('data-page') === targetPage);
                 if (activeLink && isCompactViewport()) {
                     activeLink.scrollIntoView({
@@ -1636,7 +1640,10 @@
                     {
                         name: 'Integration of Visual Foundation Models',
                         description: 'Methods that inject pre-trained visual or geometric priors into feed-forward reconstruction.',
-                        methods: ['DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat', 'VGGT', 'FF3R', 'Fisheye3R', 'G2VLM']
+                        methods: [
+                            'DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat', 'VGGT', 'FF3R', 'Fisheye3R', 'G2VLM',
+                            'VGGT-Ω', 'LangFlash'
+                        ]
                     }
                 ]
             },
@@ -1653,13 +1660,17 @@
                             'GTA', 'MuRF', 'SparseNeuS', 'VolRecon', 'ReTR', 'UFORecon',
                             'SurfaceSplat', 'RenderFormer', 'AGG', 'TGS', 'LaRa', 'MeshSplat',
                             'TranSplat', 'H3R', 'MuGS', 'pixelSplat', 'MVSplat', 'MVSGaussian',
-                            'AMB3R', 'GGPT', 'AnchorSplat', 'MAC-Splat', 'Splat-SAP', 'VGD'
+                            'AMB3R', 'GGPT', 'AnchorSplat', 'MAC-Splat', 'Splat-SAP', 'VGD',
+                            'DepthSplat', 'AirSplat', 'GPOcc'
                         ]
                     },
                     {
                         name: 'Post Refinement',
                         description: 'Post-refinement and robustness methods that densify, correct, or reject unreliable predictions.',
-                        methods: ['FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R', 'RobustVGGT / Outlier View Rejection', 'Trust3R']
+                        methods: [
+                            'FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R',
+                            'RobustVGGT / Outlier View Rejection', 'Trust3R', 'FreeSplat++'
+                        ]
                     },
                     {
                         name: 'Pose-Free Reconstruction',
@@ -1668,7 +1679,7 @@
                             'LEAP', 'Splatt3R', 'NoPoSplat', 'PF3plat', 'FreeSplatter', 'FLARE',
                             'Pow3R', 'RegGS', 'UFV-Splatter', 'pi3', 'AnySplat', 'No Pose at All',
                             'SPFSplatV2', 'PLANA3R', 'YoNoSplat', 'DUSt3R', 'Wid3R', 'CAM3R',
-                            'FlexSplat', 'WildSplat'
+                            'FlexSplat', 'WildSplat', 'Fisheye3R'
                         ]
                     },
                     {
@@ -1742,7 +1753,8 @@
                         methods: [
                             'StreamSplat (Wu et al.; uncalibrated dynamic video)', 'CUT3R', 'DGS-LRM',
                             'Stream3R', 'LongStream', 'StreamSplat (Song et al.; streaming feed-forward 3DGS)',
-                            'LASER', 'LingBot-Map', 'OnlineSplatter', 'SparseWorld-TC', 'TTSA3R', 'VGGT-Motion'
+                            'LASER', 'LingBot-Map', 'OnlineSplatter', 'SparseWorld-TC', 'TTSA3R', 'VGGT-Motion',
+                            'Event3R'
                         ]
                     },
                     {
@@ -1764,7 +1776,11 @@
                     {
                         name: 'Specialized Tasks',
                         description: 'Task-specific temporal pipelines.',
-                        methods: ['DAS3R', 'St4RTrack', 'Event3R']
+                        methods: [
+                            'DAS3R', 'St4RTrack', 'Event3R', 'SparseWorld-TC', 'DeGO',
+                            'Dynamic-Robust Photometric-Semantic Reconstruction for Open-Vocabulary 3D Scene Understanding',
+                            'VGGT-World', 'WristWorld'
+                        ]
                     }
                 ]
             }
@@ -1800,6 +1816,15 @@
             'StreamSplat (Song et al.; streaming feed-forward 3DGS)': { arxiv: '2608.01659', bibKey: 'song2026streamsplat', contribution: 'Uses a voxel-aligned causal cache that scales with explored geometry rather than sequence length for online 3D Gaussian reconstruction.' }
         };
 
+        const deferredTaxonomyMemberships = new Set([
+            'Feature Enhancement::Integration of Visual Foundation Models::VGGT-Ω',
+            'Geometry Awareness::Explicit Geometric Aggregation::DepthSplat',
+            'Geometry Awareness::Explicit Geometric Aggregation::AirSplat',
+            'Geometry Awareness::Explicit Geometric Aggregation::GPOcc',
+            'Geometry Awareness::Post Refinement::FreeSplat++',
+            'Temporal-aware Models::Online Streaming::Event3R'
+        ]);
+
         function buildTaxonomyRecords() {
             const categories = [];
             const assignmentsByMethod = new Map();
@@ -1818,9 +1843,20 @@
                     categories.push(category);
 
                     category.methods.forEach((name) => {
+                        const membershipKey = `${category.direction}::${category.subsection}::${name}`;
+                        if (deferredTaxonomyMemberships.has(membershipKey)) return;
                         if (!assignmentsByMethod.has(name)) assignmentsByMethod.set(name, []);
                         assignmentsByMethod.get(name).push(category);
                     });
+                });
+            });
+
+            // Append earlier-branch additions after established memberships so existing display order stays stable.
+            categories.forEach((category) => {
+                category.methods.forEach((name) => {
+                    const membershipKey = `${category.direction}::${category.subsection}::${name}`;
+                    if (!deferredTaxonomyMemberships.has(membershipKey)) return;
+                    assignmentsByMethod.get(name).push(category);
                 });
             });
 
