@@ -574,16 +574,11 @@
         }
 
         .taxonomy-toolbar {
-            display: grid;
-            grid-template-columns: minmax(220px, 1fr) minmax(190px, 0.45fr) auto;
-            gap: 12px;
-            align-items: center;
-            margin: 20px 0 12px;
+            margin: 12px 0;
         }
 
-        .taxonomy-toolbar input,
-        .taxonomy-toolbar select,
-        .taxonomy-toolbar button {
+        .taxonomy-toolbar input {
+            width: 100%;
             min-height: 44px;
             border: 1px solid var(--slate-200);
             border-radius: 12px;
@@ -593,17 +588,7 @@
             font: inherit;
         }
 
-        .taxonomy-toolbar button {
-            background: var(--blue-700);
-            border-color: var(--blue-700);
-            color: #fff;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
         .taxonomy-toolbar input:focus-visible,
-        .taxonomy-toolbar select:focus-visible,
-        .taxonomy-toolbar button:focus-visible,
         .taxonomy-method-button:focus-visible,
         .taxonomy-method-link:focus-visible {
             outline: 3px solid rgba(36, 88, 198, 0.24);
@@ -622,24 +607,6 @@
             border-radius: 18px;
             padding: 22px;
             overflow-x: auto;
-        }
-
-        .taxonomy-root-node {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
-            color: #fff;
-            border-radius: 14px;
-            padding: 12px 18px;
-            font-weight: 800;
-            box-shadow: 0 8px 20px rgba(36, 88, 198, 0.2);
-        }
-
-        .taxonomy-root-node span {
-            font-size: 0.8rem;
-            opacity: 0.82;
-            font-weight: 600;
         }
 
         .taxonomy-detail-panel {
@@ -969,14 +936,6 @@
                 grid-template-columns: repeat(2, minmax(180px, 1fr));
             }
 
-            .taxonomy-toolbar {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .taxonomy-toolbar button {
-                grid-column: 1 / -1;
-            }
-
             header {
                 min-height: 500px;
                 padding: 60px 24px 72px;
@@ -1167,14 +1126,6 @@
                 margin-top: 18px;
             }
 
-            .taxonomy-toolbar {
-                grid-template-columns: 1fr;
-            }
-
-            .taxonomy-toolbar button {
-                grid-column: auto;
-            }
-
             .taxonomy-graph-shell {
                 padding: 16px 12px;
             }
@@ -1215,7 +1166,6 @@
                 width: 100%;
             }
 
-            .taxonomy-rule-card,
             .taxonomy-detail-panel {
                 padding: 14px;
             }
@@ -1352,21 +1302,12 @@
         <div id="taxonomy" class="page">
             <div class="section">
                 <h2>Complete Interactive Taxonomy</h2>
-                <p class="lead">
-                    Categories are not ranked. Each method links to every branch it substantively addresses; the paper taxonomy supplies the initial link, while incidental baseline or predecessor citations do not create an edge.
-                </p>
-
                 <div class="taxonomy-toolbar" role="search">
                     <input id="taxonomySearch" type="search" placeholder="Search all methods, branches, or contributions" aria-label="Search taxonomy">
-                    <select id="taxonomyDirectionFilter" aria-label="Filter by category membership">
-                        <option value="all">All category memberships</option>
-                    </select>
-                    <button id="taxonomyCrossButton" type="button" aria-pressed="false">Show cross-category only</button>
                 </div>
                 <p class="taxonomy-status" id="taxonomyStatus" aria-live="polite"></p>
 
                 <div class="taxonomy-graph-shell">
-                    <div class="taxonomy-root-node">Feed-Forward 3D Scene Modeling <span>many-to-many category graph</span></div>
                     <div class="taxonomy-network" id="taxonomyNetwork">
                         <svg class="taxonomy-edge-layer" id="taxonomyEdges" aria-hidden="true"></svg>
                         <div class="taxonomy-category-panel" id="taxonomyCategories" aria-label="Challenge category nodes"></div>
@@ -1839,23 +1780,6 @@
                         methods: ['DAS3R', 'St4RTrack']
                     }
                 ]
-            },
-            {
-                name: 'Applications / Future Directions',
-                kind: 'Supporting track',
-                color: '#64748b',
-                subsections: [
-                    {
-                        name: 'World Models and Video Generation',
-                        description: 'Systems that combine reconstruction with generation, planning, simulation, or long-horizon world modeling.',
-                        methods: ['HY-World 2.0']
-                    },
-                    {
-                        name: 'Persistent Interactive World State',
-                        description: 'Methods that maintain a persistent 3D state for long-horizon interaction.',
-                        methods: ['PERSIST']
-                    }
-                ]
             }
         ];
 
@@ -1864,8 +1788,6 @@
             'WorldMirror': { arxiv: '2510.10726', bibKey: 'liu2025worldmirror', contribution: 'Accepts arbitrary pose, intrinsics, and depth priors and jointly predicts cameras, depth, point maps, normals, and 3D Gaussians.' },
             'AMB3R': { arxiv: '2511.20343', bibKey: 'wang2025amb3r', contribution: 'Fuses point-map features in a compact sparse volumetric backend for metric-scale reconstruction and transfer to VO and SfM.' },
             'Any4D': { arxiv: '2512.10935', bibKey: 'karhade2025any4d', contribution: 'Predicts metric-scale dense 4D geometry and motion while supporting optional RGB-D, IMU, and radar inputs.' },
-            'HY-World 2.0': { arxiv: '2604.14268', bibKey: 'team2026hyworld', contribution: 'Combines panoramic generation, trajectory planning, persistent expansion, WorldMirror 2.0 reconstruction, and interactive rendering.' },
-            'PERSIST': { arxiv: '2603.03482', bibKey: 'garcin2026persist', contribution: 'Maintains a continually updated latent 3D scene state for long-range spatial memory and geometric consistency.' },
             'FlashVGGT': { arxiv: '2512.01540', bibKey: 'wang2025flashvggt', contribution: 'Replaces dense all-token global attention with compressed descriptor attention and a recursive cache for long sequences.' },
             'PRoPE': { arxiv: '2507.10496', bibKey: 'li2025prope', contribution: 'Encodes complete camera frustums as attention-level relative positional information for cross-view geometric reasoning.' },
             'GGPT': { arxiv: '2603.11174', bibKey: 'chen2026ggpt', contribution: 'Uses lightweight SfM to obtain reliable sparse geometry and propagates it into dense point maps with a 3D point transformer.' },
@@ -1928,12 +1850,9 @@
         const taxonomyRecords = buildTaxonomyRecords();
         const categoryRecords = taxonomyRecords.categories;
         const methodRecords = taxonomyRecords.methods;
-        let taxonomyCrossOnly = false;
         let taxonomySelection = null;
 
-        function recordMatches(record, query, directionFilter) {
-            if (taxonomyCrossOnly && record.categories.length < 2) return false;
-            if (directionFilter !== 'all' && !record.categories.some((item) => item.direction === directionFilter)) return false;
+        function recordMatches(record, query) {
             if (!query) return true;
 
             const searchable = [
@@ -1989,8 +1908,7 @@
 
         function renderTaxonomyGraph() {
             const query = document.getElementById('taxonomySearch').value.trim().toLowerCase();
-            const directionFilter = document.getElementById('taxonomyDirectionFilter').value;
-            const matchingRecords = methodRecords.filter((record) => recordMatches(record, query, directionFilter));
+            const matchingRecords = methodRecords.filter((record) => recordMatches(record, query));
             const matchingIndexes = new Set(matchingRecords.map((record) => methodRecords.indexOf(record)));
 
             renderCategoryPanel(matchingRecords);
@@ -1998,7 +1916,7 @@
                 ? taxonomyDirections.map((direction, directionIndex) => {
                     const groupRecords = matchingRecords.filter((record) => record.displayDirection === direction.name);
                     if (!groupRecords.length) return '';
-                    const sectionLabel = directionIndex < 5 ? `§4.${directionIndex + 1}` : 'Applications / Future';
+                    const sectionLabel = `§4.${directionIndex + 1}`;
                     return `
                         <section class="taxonomy-method-group" style="--group-color: ${direction.color}" data-display-direction="${escapeHtml(direction.name)}">
                             <div class="taxonomy-method-group-header">
@@ -2166,26 +2084,8 @@
             `;
         }
 
-        function toggleCrossCategoryFilter() {
-            taxonomyCrossOnly = !taxonomyCrossOnly;
-            const button = document.getElementById('taxonomyCrossButton');
-            button.setAttribute('aria-pressed', String(taxonomyCrossOnly));
-            button.textContent = taxonomyCrossOnly ? 'Show all methods' : 'Show cross-category only';
-            renderTaxonomyGraph();
-        }
-
         function initializeTaxonomy() {
-            const directionFilter = document.getElementById('taxonomyDirectionFilter');
-            taxonomyDirections.forEach((direction) => {
-                const option = document.createElement('option');
-                option.value = direction.name;
-                option.textContent = `${direction.name} (${direction.kind})`;
-                directionFilter.appendChild(option);
-            });
-
             document.getElementById('taxonomySearch').addEventListener('input', renderTaxonomyGraph);
-            directionFilter.addEventListener('change', renderTaxonomyGraph);
-            document.getElementById('taxonomyCrossButton').addEventListener('click', toggleCrossCategoryFilter);
             document.querySelector('.taxonomy-method-panel').addEventListener('scroll', applyTaxonomySelection, { passive: true });
             window.addEventListener('resize', applyTaxonomySelection, { passive: true });
             renderTaxonomyGraph();
@@ -2196,7 +2096,6 @@
                 crossCategoryMethodCount: methodRecords.filter((record) => record.categories.length > 1).length,
                 recentMethodCount: methodRecords.filter((record) => record.metadata).length,
                 coreDirectionCount: taxonomyDirections.filter((direction) => direction.kind === 'Core challenge').length,
-                supportingTrackCount: taxonomyDirections.filter((direction) => direction.kind === 'Supporting track').length,
                 methodsWithoutLinks: methodRecords.filter((record) => !record.link).map((record) => record.name)
             };
         }
