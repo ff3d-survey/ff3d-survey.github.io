@@ -1618,7 +1618,8 @@
                             'Light Field Networks', 'Learned Initializations', 'NeuRay', 'C3-GS', 'SRT',
                             'VisionNeRF', 'RePAST', 'GNT', 'LRM', 'Instant3D', 'TripoSR', 'GRM',
                             'GS-LRM', 'MeshLRM', 'MeshFormer', 'Flex3D', 'LVSM', 'Depth Anything 3',
-                            'Gamba', 'MVGamba', 'Long-LRM', 'LGM', 'CATSplat', 'VGGT', 'UniQueR', '2Xplat'
+                            'Gamba', 'MVGamba', 'Long-LRM', 'LGM', 'CATSplat', 'VGGT', 'UniQueR', '2Xplat',
+                            'InfiniSplat', 'LangFlash', 'TokenGS', 'UniqueSplat', 'ViewSplat'
                         ]
                     },
                     {
@@ -1629,13 +1630,13 @@
                             'MV-DUSt3R+', 'PreF3R', 'Spann3R', 'Fast3R', 'MUSt3R', 'WinT3R',
                             'CUT3R', 'VolSplat', 'G-CUT3R', 'TTT3R', 'Point3R', 'iLRM',
                             'Dens3r', 'MoRE', 'Uni3R', 'Flow3r', 'Gen3R', 'NOVA3R', 'IncVGGT',
-                            'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3', 'PRoPE', 'TokenSplat', 'FF3R'
+                            'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3', 'PRoPE', 'TokenSplat', 'FF3R', 'DAGE'
                         ]
                     },
                     {
                         name: 'Integration of Visual Foundation Models',
                         description: 'Methods that inject pre-trained visual or geometric priors into feed-forward reconstruction.',
-                        methods: ['DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat', 'VGGT', 'FF3R']
+                        methods: ['DUSt3R', 'Mono3R', 'Feat2GS', 'CATSplat', 'VGGT', 'FF3R', 'Fisheye3R', 'G2VLM']
                     }
                 ]
             },
@@ -1652,13 +1653,13 @@
                             'GTA', 'MuRF', 'SparseNeuS', 'VolRecon', 'ReTR', 'UFORecon',
                             'SurfaceSplat', 'RenderFormer', 'AGG', 'TGS', 'LaRa', 'MeshSplat',
                             'TranSplat', 'H3R', 'MuGS', 'pixelSplat', 'MVSplat', 'MVSGaussian',
-                            'AMB3R', 'GGPT'
+                            'AMB3R', 'GGPT', 'AnchorSplat', 'MAC-Splat', 'Splat-SAP', 'VGD'
                         ]
                     },
                     {
                         name: 'Post Refinement',
                         description: 'Post-refinement and robustness methods that densify, correct, or reject unreliable predictions.',
-                        methods: ['FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R', 'RobustVGGT / Outlier View Rejection']
+                        methods: ['FreeSplat', 'HiSplat', 'PixelGaussian', 'GGN', 'Generative Densification', 'G3R', 'RobustVGGT / Outlier View Rejection', 'Trust3R']
                     },
                     {
                         name: 'Pose-Free Reconstruction',
@@ -1666,7 +1667,8 @@
                         methods: [
                             'LEAP', 'Splatt3R', 'NoPoSplat', 'PF3plat', 'FreeSplatter', 'FLARE',
                             'Pow3R', 'RegGS', 'UFV-Splatter', 'pi3', 'AnySplat', 'No Pose at All',
-                            'SPFSplatV2', 'PLANA3R', 'YoNoSplat', 'DUSt3R', 'Wid3R', 'CAM3R'
+                            'SPFSplatV2', 'PLANA3R', 'YoNoSplat', 'DUSt3R', 'Wid3R', 'CAM3R',
+                            'FlexSplat', 'WildSplat'
                         ]
                     },
                     {
@@ -1674,7 +1676,8 @@
                         description: 'Methods that inject monocular depth, normals, or geometry priors from strong teachers.',
                         methods: [
                             'DepthSplat', 'Flash3D', 'Niagara', 'PM-Loss', 'Fin3R', 'JointSplat', 'AnySplat',
-                            'WorldMirror', 'OmniVGGT', 'Geometric Understanding and Learned Priors'
+                            'WorldMirror', 'OmniVGGT', 'Geometric Understanding and Learned Priors',
+                            'AirSplat', 'GPOcc'
                         ]
                     }
                 ]
@@ -1692,13 +1695,18 @@
                             'Quantized Visual Geometry Grounded Transformer',
                             'Faster VGGT with Block-Sparse Global Attention',
                             'Evict3R', 'LiteVGGT', 'Speed3R', 'SR3R', 'Long-LRM', 'iLRM', 'ZipMap', 'VGG-T3',
-                            'VGGT-Ω', 'FlashVGGT', 'Diversity-aware View Partitioning', 'Déjà View', 'SAF3R', 'QVGGT'
+                            'VGGT-Ω', 'FlashVGGT', 'Diversity-aware View Partitioning', 'Déjà View', 'SAF3R', 'QVGGT',
+                            'AVGGT', 'HeSS', 'HTTM', 'InfiniteVGGT', 'Long-LRM++', 'MuSASplat', 'STAC',
+                            'Z-Order Transformer for Feed-Forward Gaussian Splatting'
                         ]
                     },
                     {
                         name: 'Representation Compaction',
                         description: 'Methods that reduce redundancy in Gaussian scene representations.',
-                        methods: ['GGN', 'PixelGaussian', 'FreeSplat++', 'LongSplat', 'Long-LRM', 'iLRM']
+                        methods: [
+                            'GGN', 'PixelGaussian', 'FreeSplat++', 'LongSplat', 'Long-LRM', 'iLRM',
+                            'AdaptiveSplat', 'Off The Grid', 'SparseSplat', 'SubSplat'
+                        ]
                     }
                 ]
             },
@@ -1710,14 +1718,15 @@
                     {
                         name: 'Data Augmentation',
                         description: 'Data scaling, supervision scaling, and domain adaptation strategies.',
-                        methods: ['MegaSynth', 'Puzzles', 'Aug3D', 'MVBoost', 'Reliev3R', 'Wild3R', 'Wat3R']
+                        methods: ['MegaSynth', 'Puzzles', 'Aug3D', 'MVBoost', 'Reliev3R', 'Wild3R', 'Wat3R', 'AREA3D', 'E-RayZer']
                     },
                     {
                         name: 'Visual Augmentation',
                         description: 'Methods that use diffusion or generative priors to improve visual fidelity.',
                         methods: [
                             'MVSplat360', 'latentSplat', 'ProSplat', 'Difix3D+', 'Reconstruct, Inpaint, Finetune',
-                            'G3R', 'TTT3R', 'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3'
+                            'G3R', 'TTT3R', 'ZipMap', 'LoGeR', 'tttLRM', 'VGG-T3',
+                            'One-Shot Refiner', 'One2Scene', 'Pano3DComposer', 'SRSplat', 'StereoSplat+', 'Z3D'
                         ]
                     }
                 ]
@@ -1732,7 +1741,8 @@
                         description: 'Causal and streaming reconstruction models.',
                         methods: [
                             'StreamSplat (Wu et al.; uncalibrated dynamic video)', 'CUT3R', 'DGS-LRM',
-                            'Stream3R', 'LongStream', 'StreamSplat (Song et al.; streaming feed-forward 3DGS)'
+                            'Stream3R', 'LongStream', 'StreamSplat (Song et al.; streaming feed-forward 3DGS)',
+                            'LASER', 'LingBot-Map', 'OnlineSplatter', 'SparseWorld-TC', 'TTSA3R', 'VGGT-Motion'
                         ]
                     },
                     {
@@ -1740,7 +1750,10 @@
                         description: 'Windowed or batch temporal models for globally consistent 4D reconstruction.',
                         methods: [
                             'L4GM', '4D-LRM', 'MonST3R', 'Easi3R', '4DGT', 'MoVieS', '4Real-Video-V2',
-                            'MonoFusion', 'EgoMono4D', 'BTimer', 'Any4D', 'UFO-4D', '4RC', 'NeoVerse'
+                            'MonoFusion', 'EgoMono4D', 'BTimer', 'Any4D', 'UFO-4D', '4RC', 'NeoVerse',
+                            '4D-VGGT', 'C4D', 'DeGO',
+                            'Dynamic-Robust Photometric-Semantic Reconstruction for Open-Vocabulary 3D Scene Understanding',
+                            'MoRe', 'OmniX', 'PAGE-4D', 'TrajVG', 'UniSplat', 'V-DPM', 'VGGT-World', 'VGGT4D', 'WristWorld'
                         ]
                     },
                     {
@@ -1751,7 +1764,7 @@
                     {
                         name: 'Specialized Tasks',
                         description: 'Task-specific temporal pipelines.',
-                        methods: ['DAS3R', 'St4RTrack']
+                        methods: ['DAS3R', 'St4RTrack', 'Event3R']
                     }
                 ]
             }
