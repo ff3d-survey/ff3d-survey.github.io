@@ -682,33 +682,6 @@
             font-weight: 700;
         }
 
-        .taxonomy-reviewer-examples {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 9px;
-            margin: 18px 0;
-        }
-
-        .taxonomy-reviewer-examples::before {
-            content: "Cross-category examples:";
-            color: var(--slate-700);
-            font-size: 0.88rem;
-            font-weight: 800;
-        }
-
-        .taxonomy-example-button {
-            border: 1px solid #a7d7c5;
-            border-radius: 999px;
-            background: #ecfdf5;
-            color: #166534;
-            padding: 7px 11px;
-            cursor: pointer;
-            font: inherit;
-            font-size: 0.82rem;
-            font-weight: 800;
-        }
-
         .taxonomy-network {
             position: relative;
             display: grid;
@@ -1196,10 +1169,6 @@
                 max-height: 780px;
             }
 
-            .taxonomy-reviewer-examples::before {
-                flex-basis: 100%;
-            }
-
             .bibtex-block {
                 padding: 1rem;
             }
@@ -1391,7 +1360,6 @@
 
                 <div class="taxonomy-graph-shell">
                     <div class="taxonomy-root-node">Feed-Forward 3D Scene Modeling <span>many-to-many category graph</span></div>
-                    <div class="taxonomy-reviewer-examples" id="taxonomyExamples" aria-label="Cross-category examples highlighted by the reviewer"></div>
                     <div class="taxonomy-network" id="taxonomyNetwork">
                         <svg class="taxonomy-edge-layer" id="taxonomyEdges" aria-hidden="true"></svg>
                         <div class="taxonomy-category-panel" id="taxonomyCategories" aria-label="Challenge category nodes"></div>
@@ -1916,10 +1884,6 @@
             'StreamSplat (Song et al.; streaming feed-forward 3DGS)': { arxiv: '2608.01659', bibKey: 'song2026streamsplat', contribution: 'Uses a voxel-aligned causal cache that scales with explored geometry rather than sequence length for online 3D Gaussian reconstruction.' }
         };
 
-        function categoryKey(category) {
-            return `${category.direction}\u0000${category.subsection}`;
-        }
-
         function buildTaxonomyRecords() {
             const categories = [];
             const assignmentsByMethod = new Map();
@@ -1956,10 +1920,8 @@
         const taxonomyRecords = buildTaxonomyRecords();
         const categoryRecords = taxonomyRecords.categories;
         const methodRecords = taxonomyRecords.methods;
-        const methodRecordByName = new Map(methodRecords.map((record) => [record.name, record]));
-        const reviewerExampleNames = ['GGN', 'PixelGaussian', 'DUSt3R'];
         let taxonomyCrossOnly = false;
-        let taxonomySelection = { type: 'method', index: methodRecords.findIndex((record) => record.name === 'DUSt3R') };
+        let taxonomySelection = null;
 
         function recordMatches(record, query, directionFilter) {
             if (taxonomyCrossOnly && record.categories.length < 2) return false;
@@ -2017,29 +1979,12 @@
             }).join('');
         }
 
-        function renderReviewerExamples() {
-            const container = document.getElementById('taxonomyExamples');
-            container.innerHTML = reviewerExampleNames.map((name) => {
-                const index = methodRecords.findIndex((record) => record.name === name);
-                const record = methodRecords[index];
-                const branchNames = record.categories.map((category) => category.subsection).join(' ↔ ');
-                return `<button class="taxonomy-example-button" type="button" data-method-index="${index}">${escapeHtml(name)} · ${escapeHtml(branchNames)}</button>`;
-            }).join('');
-            container.querySelectorAll('.taxonomy-example-button').forEach((button) => {
-                button.addEventListener('click', () => selectMethod(Number(button.dataset.methodIndex)));
-            });
-        }
-
         function renderTaxonomyGraph() {
             const query = document.getElementById('taxonomySearch').value.trim().toLowerCase();
             const directionFilter = document.getElementById('taxonomyDirectionFilter').value;
-            const exampleRank = new Map(reviewerExampleNames.map((name, index) => [name, index]));
             const matchingRecords = methodRecords
                 .filter((record) => recordMatches(record, query, directionFilter))
                 .sort((left, right) => {
-                    const leftRank = exampleRank.has(left.name) ? exampleRank.get(left.name) : Number.POSITIVE_INFINITY;
-                    const rightRank = exampleRank.has(right.name) ? exampleRank.get(right.name) : Number.POSITIVE_INFINITY;
-                    if (leftRank !== rightRank) return leftRank - rightRank;
                     if ((left.categories.length > 1) !== (right.categories.length > 1)) return left.categories.length > 1 ? -1 : 1;
                     return left.name.localeCompare(right.name);
                 });
@@ -2211,14 +2156,12 @@
                 directionFilter.appendChild(option);
             });
 
-            renderReviewerExamples();
             document.getElementById('taxonomySearch').addEventListener('input', renderTaxonomyGraph);
             directionFilter.addEventListener('change', renderTaxonomyGraph);
             document.getElementById('taxonomyCrossButton').addEventListener('click', toggleCrossCategoryFilter);
             document.querySelector('.taxonomy-method-panel').addEventListener('scroll', applyTaxonomySelection, { passive: true });
             window.addEventListener('resize', applyTaxonomySelection, { passive: true });
             renderTaxonomyGraph();
-            selectMethod(methodRecords.findIndex((record) => record.name === 'DUSt3R'));
 
             window.taxonomyAudit = {
                 methodCount: methodRecords.length,
@@ -2227,7 +2170,6 @@
                 recentMethodCount: methodRecords.filter((record) => record.metadata).length,
                 coreDirectionCount: taxonomyDirections.filter((direction) => direction.kind === 'Core challenge').length,
                 supportingTrackCount: taxonomyDirections.filter((direction) => direction.kind === 'Supporting track').length,
-                reviewerExamples: Object.fromEntries(reviewerExampleNames.map((name) => [name, methodRecordByName.get(name).categories.map(categoryKey)])),
                 methodsWithoutLinks: methodRecords.filter((record) => !record.link).map((record) => record.name)
             };
         }
