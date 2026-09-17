@@ -652,9 +652,18 @@
         .taxonomy-edge {
             fill: none;
             stroke: var(--blue-700);
-            stroke-width: 2.5;
             stroke-linecap: round;
-            opacity: 0.62;
+        }
+
+        .taxonomy-edge.is-primary {
+            stroke-width: 3;
+            opacity: 0.82;
+        }
+
+        .taxonomy-edge.is-additional {
+            stroke-width: 1.8;
+            stroke-dasharray: 5 5;
+            opacity: 0.42;
         }
 
         .taxonomy-edge.is-overview {
@@ -724,10 +733,22 @@
             transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
         }
 
-        .taxonomy-category-button:hover,
-        .taxonomy-category-button.is-connected {
+        .taxonomy-category-button:hover {
             border-color: var(--direction-color);
             background: color-mix(in srgb, var(--direction-color) 8%, white);
+        }
+
+        .taxonomy-category-button.is-connected.is-primary-connection {
+            border-color: var(--direction-color);
+            border-width: 2px;
+            background: color-mix(in srgb, var(--direction-color) 13%, white);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--direction-color) 14%, transparent);
+        }
+
+        .taxonomy-category-button.is-connected.is-additional-connection {
+            border-color: color-mix(in srgb, var(--direction-color) 58%, white);
+            border-style: dashed;
+            background: color-mix(in srgb, var(--direction-color) 5%, white);
         }
 
         .taxonomy-category-button.is-selected {
@@ -807,11 +828,17 @@
             border-color: #a7d7c5;
         }
 
-        .taxonomy-method-node.is-connected,
-        .taxonomy-method-node.is-selected {
+        .taxonomy-method-node.is-selected,
+        .taxonomy-method-node.is-connected.is-primary-connection {
             border-color: var(--node-color);
             box-shadow: 0 0 0 2px color-mix(in srgb, var(--node-color) 18%, transparent);
             transform: translateY(-1px);
+        }
+
+        .taxonomy-method-node.is-connected.is-additional-connection {
+            border-color: color-mix(in srgb, var(--node-color) 58%, white);
+            border-style: dashed;
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--node-color) 10%, transparent);
         }
 
         .taxonomy-network.has-selection .taxonomy-method-node:not(.is-connected):not(.is-selected),
@@ -839,21 +866,84 @@
             line-height: 1.35;
         }
 
-        .taxonomy-membership-count {
-            display: inline-flex;
-            align-items: center;
+        .taxonomy-membership-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-width: 0;
+            max-width: 100%;
             margin-top: 6px;
-            border-radius: 999px;
-            padding: 2px 7px;
-            background: var(--blue-100);
-            color: var(--blue-900);
-            font-size: 0.66rem;
-            line-height: 1.4;
-            font-weight: 800;
         }
 
-        .taxonomy-method-node.is-cross-category .taxonomy-membership-count {
-            background: #dcfce7;
+        .taxonomy-membership-badge {
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
+            border-radius: 999px;
+            padding: 2px 7px;
+            font-size: 0.64rem;
+            line-height: 1.35;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .taxonomy-membership-badge.is-primary {
+            background: var(--blue-100);
+            color: var(--blue-900);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-700) 22%, transparent);
+        }
+
+        .taxonomy-membership-badge.is-additional {
+            border: 1px dashed #86bfa9;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .taxonomy-membership-badge.is-new {
+            background: var(--slate-100);
+            color: var(--slate-600);
+        }
+
+        .taxonomy-membership-detail-list {
+            display: grid;
+            gap: 6px;
+            margin: 8px 0 0 20px;
+        }
+
+        .taxonomy-membership-detail-list li {
+            padding-left: 2px;
+            overflow-wrap: anywhere;
+        }
+
+        .taxonomy-membership-detail-list li.is-primary::marker {
+            color: var(--blue-700);
+        }
+
+        .taxonomy-membership-detail-list li.is-additional::marker {
+            color: #5f9f87;
+        }
+
+        .taxonomy-role-summary {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .taxonomy-role-summary span {
+            border-radius: 999px;
+            padding: 2px 7px;
+            font-size: 0.76rem;
+            font-weight: 750;
+        }
+
+        .taxonomy-role-summary .is-primary {
+            background: var(--blue-100);
+            color: var(--blue-900);
+        }
+
+        .taxonomy-role-summary .is-additional {
+            border: 1px dashed #86bfa9;
+            background: #f0fdf4;
             color: #166534;
         }
 
@@ -2088,16 +2178,35 @@
             return searchable.includes(query);
         }
 
+        function getMembershipRole(record, category) {
+            return record.categories[0] === category ? 'primary' : 'additional';
+        }
+
         function renderMethodNode(record, index) {
             const resourceLink = record.link
                 ? `<a class="taxonomy-method-link" href="${escapeHtml(record.link)}" target="_blank" rel="noopener noreferrer" aria-label="Open resource for ${escapeHtml(record.name)}">↗</a>`
                 : '';
-            const addition = record.metadata ? ' · new' : '';
+            const primaryCategory = record.categories[0];
+            const additionalCount = record.categories.length - 1;
+            const membershipDetail = record.categories.map((category, membershipIndex) =>
+                `${membershipIndex === 0 ? 'Primary' : 'Additional'}: ${category.direction} → ${category.subsection}`
+            ).join('; ');
+            const interactionLabel = `Show category connections for ${record.name}. ${membershipDetail}`;
+            const additionalBadge = additionalCount
+                ? `<span class="taxonomy-membership-badge is-additional" data-membership-role="additional" data-assignment-count="${additionalCount}">+${additionalCount} additional</span>`
+                : '';
+            const recentBadge = record.metadata
+                ? '<span class="taxonomy-membership-badge is-new">New</span>'
+                : '';
             return `
-                <article class="taxonomy-method-node${record.categories.length > 1 ? ' is-cross-category' : ''}" data-method-index="${index}">
-                    <button class="taxonomy-method-button" type="button" data-method-index="${index}" aria-label="Show all category connections for ${escapeHtml(record.name)}">
+                <article class="taxonomy-method-node${additionalCount ? ' is-cross-category' : ''}" data-method-index="${index}" data-primary-category-index="${primaryCategory.index}" data-primary-direction="${escapeHtml(primaryCategory.direction)}" data-membership-count="${record.categories.length}" data-additional-count="${additionalCount}">
+                    <button class="taxonomy-method-button" type="button" data-method-index="${index}" title="${escapeHtml(membershipDetail)}" aria-label="${escapeHtml(interactionLabel)}">
                         <span class="taxonomy-method-name">${escapeHtml(record.name)}</span>
-                        <span class="taxonomy-membership-count">${record.categories.length} ${record.categories.length === 1 ? 'category' : 'categories'}${addition}</span>
+                        <span class="taxonomy-membership-badges">
+                            <span class="taxonomy-membership-badge is-primary" data-membership-role="primary" data-category-index="${primaryCategory.index}">Primary</span>
+                            ${additionalBadge}
+                            ${recentBadge}
+                        </span>
                     </button>
                     ${resourceLink}
                 </article>
@@ -2111,8 +2220,15 @@
                     .filter((category) => category.direction === direction.name)
                     .map((category) => {
                         const connected = category.methods.filter((name) => visibleNames.has(name)).length;
+                        const categoryMethodRecords = category.methods
+                            .map((name) => methodRecords.find((record) => record.name === name))
+                            .filter(Boolean);
+                        const primaryMethodCount = categoryMethodRecords
+                            .filter((record) => getMembershipRole(record, category) === 'primary').length;
+                        const additionalMethodCount = categoryMethodRecords.length - primaryMethodCount;
+                        const categoryLabel = `Highlight ${category.subsection} methods. ${primaryMethodCount} primary and ${additionalMethodCount} additional assignments.`;
                         return `
-                            <button class="taxonomy-category-button" type="button" data-category-index="${category.index}" style="--direction-color: ${category.color}" aria-label="Highlight ${escapeHtml(category.subsection)} methods">
+                            <button class="taxonomy-category-button" type="button" data-category-index="${category.index}" data-primary-method-count="${primaryMethodCount}" data-additional-method-count="${additionalMethodCount}" style="--direction-color: ${category.color}" title="${escapeHtml(categoryLabel)}" aria-label="${escapeHtml(categoryLabel)}">
                                 <span>${escapeHtml(category.subsection)}</span>
                                 <span>${connected}/${category.methods.length}</span>
                             </button>
@@ -2199,7 +2315,8 @@
             const network = document.getElementById('taxonomyNetwork');
             network.classList.toggle('has-selection', Boolean(taxonomySelection));
             document.querySelectorAll('.taxonomy-method-node, .taxonomy-category-button').forEach((node) => {
-                node.classList.remove('is-selected', 'is-connected');
+                node.classList.remove('is-selected', 'is-connected', 'is-primary-connection', 'is-additional-connection');
+                delete node.dataset.connectionRole;
             });
             if (!taxonomySelection) {
                 const overviewEdges = methodRecords.flatMap((record, methodIndex) => {
@@ -2208,7 +2325,8 @@
                     return record.categories.slice(1).map((category) => ({
                         categoryNode: document.querySelector(`.taxonomy-category-button[data-category-index="${category.index}"]`),
                         methodNode,
-                        color: category.color
+                        color: category.color,
+                        role: 'additional'
                     }));
                 });
                 requestAnimationFrame(() => drawTaxonomyEdges(overviewEdges, true));
@@ -2220,10 +2338,12 @@
                 const methodNode = document.querySelector(`.taxonomy-method-node[data-method-index="${taxonomySelection.index}"]`);
                 if (!record || !methodNode) return;
                 methodNode.classList.add('is-selected');
-                const edges = record.categories.map((category) => {
+                const edges = record.categories.map((category, membershipIndex) => {
+                    const role = membershipIndex === 0 ? 'primary' : 'additional';
                     const categoryNode = document.querySelector(`.taxonomy-category-button[data-category-index="${category.index}"]`);
-                    categoryNode?.classList.add('is-connected');
-                    return { categoryNode, methodNode, color: category.color };
+                    categoryNode?.classList.add('is-connected', `is-${role}-connection`);
+                    if (categoryNode) categoryNode.dataset.connectionRole = role;
+                    return { categoryNode, methodNode, color: category.color, role };
                 });
                 requestAnimationFrame(() => drawTaxonomyEdges(edges));
                 return;
@@ -2234,9 +2354,12 @@
             categoryNode?.classList.add('is-selected');
             const edges = category.methods.map((name) => {
                 const methodIndex = methodRecords.findIndex((record) => record.name === name);
+                const record = methodRecords[methodIndex];
                 const methodNode = document.querySelector(`.taxonomy-method-node[data-method-index="${methodIndex}"]`);
-                methodNode?.classList.add('is-connected');
-                return { categoryNode, methodNode, color: category.color };
+                const role = getMembershipRole(record, category);
+                methodNode?.classList.add('is-connected', `is-${role}-connection`);
+                if (methodNode) methodNode.dataset.connectionRole = role;
+                return { categoryNode, methodNode, color: category.color, role };
             });
             requestAnimationFrame(() => drawTaxonomyEdges(edges));
         }
@@ -2253,7 +2376,7 @@
                 if (!categoryNode || !methodNode) return false;
                 const methodRect = methodNode.getBoundingClientRect();
                 return methodRect.bottom >= panelRect.top && methodRect.top <= panelRect.bottom;
-            }).map(({ categoryNode, methodNode, color }) => {
+            }).map(({ categoryNode, methodNode, color, role }) => {
                 const categoryRect = categoryNode.getBoundingClientRect();
                 const methodRect = methodNode.getBoundingClientRect();
                 const stacked = window.matchMedia('(max-width: 980px)').matches;
@@ -2273,15 +2396,22 @@
                     const controlX = startX + (endX - startX) / 2;
                     path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`;
                 }
-                return `<path class="taxonomy-edge${overview ? ' is-overview' : ''}" style="stroke:${color}" d="${path}"></path>`;
+                const membershipRole = role === 'primary' ? 'primary' : 'additional';
+                return `<path class="taxonomy-edge is-${membershipRole}${overview ? ' is-overview' : ''}" data-membership-role="${membershipRole}" style="stroke:${color}" d="${path}"></path>`;
             }).join('');
         }
 
         function showMethodDetails(record) {
             if (!record) return;
-            const memberships = record.categories
-                .map((item) => `${escapeHtml(item.direction)} → ${escapeHtml(item.subsection)}`)
-                .join('; ');
+            const memberships = record.categories.map((category, membershipIndex) => {
+                const role = membershipIndex === 0 ? 'primary' : 'additional';
+                return `
+                    <li class="is-${role}" data-membership-role="${role}" data-category-index="${category.index}">
+                        <strong>${role === 'primary' ? 'Primary' : 'Additional'}:</strong>
+                        ${escapeHtml(category.direction)} → ${escapeHtml(category.subsection)}
+                    </li>
+                `;
+            }).join('');
             const metadata = record.metadata;
             const contribution = metadata?.contribution || 'This method is included in the complete taxonomy graph; select any connected category to inspect its peer methods.';
             const identifiers = metadata
@@ -2293,7 +2423,8 @@
             document.getElementById('taxonomyDetail').innerHTML = `
                 <h3>${escapeHtml(record.name)}</h3>
                 <p>${escapeHtml(contribution)}</p>
-                <p><strong>Category memberships (${record.categories.length}):</strong> ${memberships}</p>
+                <p><strong>Category memberships (${record.categories.length})</strong></p>
+                <ul class="taxonomy-membership-detail-list" data-primary-count="1" data-additional-count="${record.categories.length - 1}">${memberships}</ul>
                 ${identifiers}
                 ${resource}
             `;
@@ -2301,10 +2432,21 @@
         }
 
         function showCategoryDetails(category) {
+            const connectedRecords = category.methods
+                .map((name) => methodRecords.find((record) => record.name === name))
+                .filter(Boolean);
+            const primaryMethodCount = connectedRecords
+                .filter((record) => getMembershipRole(record, category) === 'primary').length;
+            const additionalMethodCount = connectedRecords.length - primaryMethodCount;
             document.getElementById('taxonomyDetail').innerHTML = `
                 <h3>${escapeHtml(category.direction)} → ${escapeHtml(category.subsection)}</h3>
                 <p>${escapeHtml(category.description)}</p>
-                <p><strong>${category.methods.length} connected methods.</strong> Cross-category nodes remain connected to every other substantive branch.</p>
+                <p><strong>${category.methods.length} connected methods:</strong>
+                    <span class="taxonomy-role-summary" data-primary-count="${primaryMethodCount}" data-additional-count="${additionalMethodCount}">
+                        <span class="is-primary">${primaryMethodCount} primary</span>
+                        <span class="is-additional">${additionalMethodCount} additional</span>
+                    </span>
+                </p>
             `;
         }
 
@@ -2314,9 +2456,31 @@
             window.addEventListener('resize', applyTaxonomySelection, { passive: true });
             renderTaxonomyGraph();
 
+            const assignmentCount = methodRecords.reduce((total, record) => total + record.categories.length, 0);
+            const primaryAssignmentCount = methodRecords.reduce((total, record) =>
+                total + record.categories.filter((category) => getMembershipRole(record, category) === 'primary').length, 0
+            );
+            const additionalAssignmentCount = methodRecords.reduce((total, record) =>
+                total + Math.max(record.categories.length - 1, 0), 0
+            );
+            const invalidPrimaryMethods = methodRecords.filter((record) => {
+                const primaryAssignments = record.categories
+                    .filter((category) => getMembershipRole(record, category) === 'primary');
+                return primaryAssignments.length !== 1 || primaryAssignments[0] !== record.categories[0];
+            }).map((record) => record.name);
+
+            console.assert(invalidPrimaryMethods.length === 0, 'Every method must have exactly one primary membership.', invalidPrimaryMethods);
+            console.assert(
+                assignmentCount === primaryAssignmentCount + additionalAssignmentCount,
+                'Taxonomy assignments must equal primary plus additional assignments.'
+            );
+
             window.taxonomyAudit = {
                 methodCount: methodRecords.length,
-                assignmentCount: methodRecords.reduce((total, record) => total + record.categories.length, 0),
+                assignmentCount,
+                primaryAssignmentCount,
+                additionalAssignmentCount,
+                invalidPrimaryMethods,
                 crossCategoryMethodCount: methodRecords.filter((record) => record.categories.length > 1).length,
                 recentMethodCount: methodRecords.filter((record) => record.metadata).length,
                 coreDirectionCount: taxonomyDirections.filter((direction) => direction.kind === 'Core challenge').length,
