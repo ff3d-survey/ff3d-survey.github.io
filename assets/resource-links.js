@@ -288,7 +288,7 @@ window.resourceLinks = {
   "4D-VGGT": "https://arxiv.org/abs/2511.18416",
   "C4D": "https://arxiv.org/abs/2510.14960",
   "DeGO": "https://arxiv.org/abs/2605.28587",
-  "Dynamic-Robust Photometric-Semantic Reconstruction for Open-Vocabulary 3D Scene Understanding": "https://arxiv.org/abs/2608.29177",
+  "SPAR": "https://arxiv.org/abs/2608.29177",
   "Event3R": "https://arxiv.org/abs/2607.15727",
   "LASER": "https://arxiv.org/abs/2512.13680",
   "LingBot-Map": "https://technology.robbyant.com/lingbot-map",
