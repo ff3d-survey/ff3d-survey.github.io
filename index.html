@@ -2214,7 +2214,7 @@
                         const primaryMethodCount = categoryMethodRecords
                             .filter((record) => getMembershipRole(record, category) === 'primary').length;
                         const additionalMethodCount = categoryMethodRecords.length - primaryMethodCount;
-                        const categoryLabel = `Highlight ${category.subsection} methods. ${primaryMethodCount} primary and ${additionalMethodCount} additional assignments.`;
+                        const categoryLabel = `Highlight ${category.subsection} ${categoryMethodRecords.length === 1 ? 'method' : 'methods'}. ${primaryMethodCount} primary ${primaryMethodCount === 1 ? 'assignment' : 'assignments'} and ${additionalMethodCount} additional ${additionalMethodCount === 1 ? 'assignment' : 'assignments'}.`;
                         return `
                             <button class="taxonomy-category-button" type="button" data-category-index="${category.index}" data-primary-method-count="${primaryMethodCount}" data-additional-method-count="${additionalMethodCount}" style="--direction-color: ${category.color}" title="${escapeHtml(categoryLabel)}" aria-label="${escapeHtml(categoryLabel)}">
                                 <span>${escapeHtml(category.subsection)}</span>
@@ -2249,7 +2249,7 @@
                         <section class="taxonomy-method-group" style="--group-color: ${direction.color}" data-display-direction="${escapeHtml(direction.name)}">
                             <div class="taxonomy-method-group-header">
                                 <h4>${escapeHtml(sectionLabel)} · ${escapeHtml(direction.name)}</h4>
-                                <span>${groupRecords.length} methods</span>
+                                <span>${groupRecords.length} ${groupRecords.length === 1 ? 'method' : 'methods'}</span>
                             </div>
                             <div class="taxonomy-method-grid">
                                 ${groupRecords.map((record) => renderMethodNode(record, methodRecords.indexOf(record))).join('')}
@@ -2439,7 +2439,7 @@
             document.getElementById('taxonomyDetail').innerHTML = `
                 <h3>${escapeHtml(category.direction)} → ${escapeHtml(category.subsection)}</h3>
                 <p>${escapeHtml(category.description)}</p>
-                <p><strong>${category.methods.length} connected methods:</strong>
+                <p><strong>${category.methods.length} connected ${category.methods.length === 1 ? 'method' : 'methods'}:</strong>
                     <span class="taxonomy-role-summary" data-primary-count="${primaryMethodCount}" data-additional-count="${additionalMethodCount}">
                         <span class="is-primary">${primaryMethodCount} primary</span>
                         <span class="is-additional">${additionalMethodCount} additional</span>
