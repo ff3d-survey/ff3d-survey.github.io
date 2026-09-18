@@ -1030,10 +1030,6 @@
         }
 
         @media (max-width: 720px) {
-            .taxonomy-edge-layer {
-                display: none;
-            }
-
             .container {
                 padding: 0 14px 18px;
             }
@@ -2371,12 +2367,21 @@
                 let terminalX;
                 let terminalY;
                 if (stacked) {
-                    const startX = categoryRect.left + categoryRect.width / 2 - networkRect.left;
-                    const startY = categoryRect.bottom - networkRect.top;
-                    terminalX = methodRect.left + methodRect.width / 2 - networkRect.left;
-                    terminalY = (overview ? panelRect.top : methodRect.top) - networkRect.top;
-                    const controlY = startY + (terminalY - startY) / 2;
-                    path = `M ${startX} ${startY} C ${startX} ${controlY}, ${terminalX} ${controlY}, ${terminalX} ${terminalY}`;
+                    if (!overview) {
+                        const laneX = Math.max(1, categoryRect.left - networkRect.left - 4 - edgeIndex * 3);
+                        const startX = categoryRect.left - networkRect.left;
+                        const startY = categoryRect.top + categoryRect.height / 2 - networkRect.top;
+                        terminalX = methodRect.left - networkRect.left;
+                        terminalY = methodRect.top + methodRect.height / 2 - networkRect.top;
+                        path = `M ${startX} ${startY} L ${laneX} ${startY} L ${laneX} ${terminalY} L ${terminalX} ${terminalY}`;
+                    } else {
+                        const startX = categoryRect.left + categoryRect.width / 2 - networkRect.left;
+                        const startY = categoryRect.bottom - networkRect.top;
+                        terminalX = Math.min(Math.max(methodRect.left + methodRect.width / 2, panelRect.left + 18), panelRect.right - 18) - networkRect.left;
+                        terminalY = panelRect.top - networkRect.top;
+                        const controlY = startY + (terminalY - startY) / 2;
+                        path = `M ${startX} ${startY} C ${startX} ${controlY}, ${terminalX} ${controlY}, ${terminalX} ${terminalY}`;
+                    }
                 } else {
                     const startX = categoryRect.right - networkRect.left;
                     const startY = categoryRect.top + categoryRect.height / 2 - networkRect.top;
