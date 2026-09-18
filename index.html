@@ -872,42 +872,19 @@
             line-height: 1.35;
         }
 
-        .taxonomy-membership-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            min-width: 0;
-            max-width: 100%;
-            margin-top: 6px;
-        }
-
-        .taxonomy-membership-badge {
+        .taxonomy-membership-badge.is-new {
             display: inline-flex;
             align-items: center;
+            width: fit-content;
             max-width: 100%;
+            margin-top: 6px;
             border-radius: 999px;
             padding: 2px 7px;
+            background: var(--slate-100);
+            color: var(--slate-600);
             font-size: 0.64rem;
             line-height: 1.35;
             font-weight: 800;
-            overflow-wrap: anywhere;
-        }
-
-        .taxonomy-membership-badge.is-primary {
-            background: var(--blue-100);
-            color: var(--blue-900);
-            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue-700) 22%, transparent);
-        }
-
-        .taxonomy-membership-badge.is-additional {
-            border: 1px dashed #86bfa9;
-            background: #f0fdf4;
-            color: #166534;
-        }
-
-        .taxonomy-membership-badge.is-new {
-            background: var(--slate-100);
-            color: var(--slate-600);
         }
 
         .taxonomy-membership-detail-list {
@@ -2207,9 +2184,6 @@
                 `${membershipIndex === 0 ? 'Primary' : 'Additional'}: ${category.direction} → ${category.subsection}`
             ).join('; ');
             const interactionLabel = `Show category connections for ${record.name}. ${membershipDetail}`;
-            const additionalBadge = additionalCount
-                ? `<span class="taxonomy-membership-badge is-additional" data-membership-role="additional" data-assignment-count="${additionalCount}">+${additionalCount} additional</span>`
-                : '';
             const recentBadge = record.metadata
                 ? '<span class="taxonomy-membership-badge is-new">New</span>'
                 : '';
@@ -2217,11 +2191,7 @@
                 <article class="taxonomy-method-node${additionalCount ? ' is-cross-category' : ''}" data-method-index="${index}" data-primary-category-index="${primaryCategory.index}" data-primary-direction="${escapeHtml(primaryCategory.direction)}" data-membership-count="${record.categories.length}" data-additional-count="${additionalCount}">
                     <button class="taxonomy-method-button" type="button" data-method-index="${index}" title="${escapeHtml(membershipDetail)}" aria-label="${escapeHtml(interactionLabel)}">
                         <span class="taxonomy-method-name">${escapeHtml(record.name)}</span>
-                        <span class="taxonomy-membership-badges">
-                            <span class="taxonomy-membership-badge is-primary" data-membership-role="primary" data-category-index="${primaryCategory.index}">Primary</span>
-                            ${additionalBadge}
-                            ${recentBadge}
-                        </span>
+                        ${recentBadge}
                     </button>
                     ${resourceLink}
                 </article>
