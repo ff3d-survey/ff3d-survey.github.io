@@ -865,11 +865,26 @@
         }
 
         .taxonomy-method-name {
-            display: block;
+            display: inline;
             overflow-wrap: anywhere;
             font-size: 0.86rem;
             font-weight: 750;
             line-height: 1.35;
+        }
+
+        .taxonomy-area-count {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 5px;
+            border-radius: 999px;
+            padding: 1px 5px;
+            background: var(--slate-100);
+            color: var(--slate-500);
+            font-size: 0.6rem;
+            line-height: 1.25;
+            font-weight: 800;
+            white-space: nowrap;
+            vertical-align: 0.08em;
         }
 
         .taxonomy-membership-badge.is-new {
@@ -2186,7 +2201,7 @@
             return `
                 <article class="taxonomy-method-node${additionalCount ? ' is-cross-category' : ''}" data-method-index="${index}" data-primary-category-index="${primaryCategory.index}" data-primary-direction="${escapeHtml(primaryCategory.direction)}" data-membership-count="${record.categories.length}" data-additional-count="${additionalCount}">
                     <button class="taxonomy-method-button" type="button" data-method-index="${index}" title="${escapeHtml(membershipDetail)}" aria-label="${escapeHtml(interactionLabel)}">
-                        <span class="taxonomy-method-name">${escapeHtml(record.name)}</span>
+                        <span class="taxonomy-method-name">${escapeHtml(record.name)}<span class="taxonomy-area-count" data-area-count="${record.categories.length}" aria-label="${record.categories.length} ${record.categories.length === 1 ? 'area' : 'areas'}">${record.categories.length}</span></span>
                         ${recentBadge}
                     </button>
                     ${resourceLink}
