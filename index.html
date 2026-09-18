@@ -595,12 +595,6 @@
             outline-offset: 2px;
         }
 
-        .taxonomy-status {
-            color: var(--slate-500);
-            font-size: 0.92rem;
-            margin-bottom: 14px;
-        }
-
         .taxonomy-graph-shell {
             background: #f8fbff;
             border: 1px solid var(--slate-200);
@@ -1382,8 +1376,6 @@
                 <div class="taxonomy-toolbar" role="search">
                     <input id="taxonomySearch" type="search" placeholder="Search all methods, branches, or contributions" aria-label="Search taxonomy">
                 </div>
-                <p class="taxonomy-status" id="taxonomyStatus" aria-live="polite"></p>
-
                 <div class="taxonomy-graph-shell">
                     <div class="taxonomy-network" id="taxonomyNetwork">
                         <svg class="taxonomy-edge-layer" id="taxonomyEdges" aria-hidden="true"></svg>
@@ -2201,7 +2193,7 @@
             return `
                 <article class="taxonomy-method-node${additionalCount ? ' is-cross-category' : ''}" data-method-index="${index}" data-primary-category-index="${primaryCategory.index}" data-primary-direction="${escapeHtml(primaryCategory.direction)}" data-membership-count="${record.categories.length}" data-additional-count="${additionalCount}">
                     <button class="taxonomy-method-button" type="button" data-method-index="${index}" title="${escapeHtml(membershipDetail)}" aria-label="${escapeHtml(interactionLabel)}">
-                        <span class="taxonomy-method-name">${escapeHtml(record.name)}<span class="taxonomy-area-count" data-area-count="${record.categories.length}" aria-label="${record.categories.length} ${record.categories.length === 1 ? 'area' : 'areas'}">${record.categories.length}</span></span>
+                        <span class="taxonomy-method-name">${escapeHtml(record.name)}<span class="taxonomy-area-count" data-area-count="${record.categories.length}">${record.categories.length} ${record.categories.length === 1 ? 'area' : 'areas'}</span></span>
                         ${recentBadge}
                     </button>
                     ${resourceLink}
@@ -2276,11 +2268,6 @@
 
             if (taxonomySelection?.type === 'method' && !matchingIndexes.has(taxonomySelection.index)) taxonomySelection = null;
             applyTaxonomySelection();
-
-            const recentVisible = matchingRecords.filter((record) => record.metadata).length;
-            const crossTotal = methodRecords.filter((record) => record.categories.length > 1).length;
-            document.getElementById('taxonomyStatus').textContent =
-                `Showing ${matchingRecords.length} of ${methodRecords.length} methods · ${crossTotal} cross-category methods · ${recentVisible} recent additions in view.`;
         }
 
         function selectMethod(index) {
