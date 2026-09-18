@@ -646,29 +646,35 @@
             height: 100%;
             overflow: visible;
             pointer-events: none;
-            z-index: 1;
+            z-index: 3;
         }
 
         .taxonomy-edge {
             fill: none;
             stroke: var(--blue-700);
             stroke-linecap: round;
+            filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.95));
         }
 
         .taxonomy-edge.is-primary {
-            stroke-width: 3;
-            opacity: 0.82;
+            stroke-width: 3.4;
+            opacity: 0.9;
         }
 
         .taxonomy-edge.is-additional {
-            stroke-width: 1.8;
-            stroke-dasharray: 5 5;
-            opacity: 0.42;
+            stroke-width: 2.1;
+            stroke-dasharray: 6 5;
+            opacity: 0.62;
         }
 
         .taxonomy-edge.is-overview {
-            stroke-width: 1.35;
-            opacity: 0.18;
+            stroke-width: 1.5;
+            opacity: 0.28;
+        }
+
+        .taxonomy-edge-terminal {
+            stroke: #fff;
+            stroke-width: 1.5;
         }
 
         .taxonomy-category-panel,
@@ -1004,6 +1010,11 @@
                 gap: 28px;
             }
 
+            .taxonomy-network:not(.has-selection) .taxonomy-edge-layer,
+            .taxonomy-edge-layer:not(.is-method-selection) {
+                display: none;
+            }
+
             .taxonomy-category-panel {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1042,6 +1053,10 @@
         }
 
         @media (max-width: 720px) {
+            .taxonomy-edge-layer {
+                display: none;
+            }
+
             .container {
                 padding: 0 14px 18px;
             }
@@ -2313,7 +2328,9 @@
 
         function applyTaxonomySelection() {
             const network = document.getElementById('taxonomyNetwork');
+            const svg = document.getElementById('taxonomyEdges');
             network.classList.toggle('has-selection', Boolean(taxonomySelection));
+            svg.classList.toggle('is-method-selection', taxonomySelection?.type === 'method');
             document.querySelectorAll('.taxonomy-method-node, .taxonomy-category-button').forEach((node) => {
                 node.classList.remove('is-selected', 'is-connected', 'is-primary-connection', 'is-additional-connection');
                 delete node.dataset.connectionRole;
@@ -2376,28 +2393,32 @@
                 if (!categoryNode || !methodNode) return false;
                 const methodRect = methodNode.getBoundingClientRect();
                 return methodRect.bottom >= panelRect.top && methodRect.top <= panelRect.bottom;
-            }).map(({ categoryNode, methodNode, color, role }) => {
+            }).map(({ categoryNode, methodNode, color, role }, edgeIndex) => {
                 const categoryRect = categoryNode.getBoundingClientRect();
                 const methodRect = methodNode.getBoundingClientRect();
                 const stacked = window.matchMedia('(max-width: 980px)').matches;
                 let path;
+                let terminalX;
+                let terminalY;
                 if (stacked) {
                     const startX = categoryRect.left + categoryRect.width / 2 - networkRect.left;
                     const startY = categoryRect.bottom - networkRect.top;
-                    const endX = methodRect.left + methodRect.width / 2 - networkRect.left;
-                    const endY = methodRect.top - networkRect.top;
-                    const controlY = startY + (endY - startY) / 2;
-                    path = `M ${startX} ${startY} C ${startX} ${controlY}, ${endX} ${controlY}, ${endX} ${endY}`;
+                    terminalX = methodRect.left + methodRect.width / 2 - networkRect.left;
+                    terminalY = (overview ? panelRect.top : methodRect.top) - networkRect.top;
+                    const controlY = startY + (terminalY - startY) / 2;
+                    path = `M ${startX} ${startY} C ${startX} ${controlY}, ${terminalX} ${controlY}, ${terminalX} ${terminalY}`;
                 } else {
                     const startX = categoryRect.right - networkRect.left;
                     const startY = categoryRect.top + categoryRect.height / 2 - networkRect.top;
-                    const endX = methodRect.left - networkRect.left;
-                    const endY = methodRect.top + methodRect.height / 2 - networkRect.top;
-                    const controlX = startX + (endX - startX) / 2;
-                    path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`;
+                    terminalX = (overview ? panelRect.left : methodRect.left) - networkRect.left;
+                    terminalY = methodRect.top + methodRect.height / 2 - networkRect.top;
+                    const controlX = startX + (terminalX - startX) / 2;
+                    path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${terminalY}, ${terminalX} ${terminalY}`;
                 }
                 const membershipRole = role === 'primary' ? 'primary' : 'additional';
-                return `<path class="taxonomy-edge is-${membershipRole}${overview ? ' is-overview' : ''}" data-membership-role="${membershipRole}" style="stroke:${color}" d="${path}"></path>`;
+                const pathMarkup = `<path class="taxonomy-edge is-${membershipRole}${overview ? ' is-overview' : ''}" data-membership-role="${membershipRole}" data-edge-index="${edgeIndex}" style="stroke:${color}" d="${path}"></path>`;
+                if (overview) return pathMarkup;
+                return `${pathMarkup}<circle class="taxonomy-edge-terminal is-${membershipRole}" data-membership-role="${membershipRole}" cx="${terminalX}" cy="${terminalY}" r="4" style="fill:${color}"></circle>`;
             }).join('');
         }
 
