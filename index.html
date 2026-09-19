@@ -1715,7 +1715,7 @@
                         name: 'Cross-View Fusion',
                         description: 'Methods that strengthen multi-view correspondence, memory, and long-context aggregation.',
                         methods: [
-                            'AttnRend', 'eFreeSplat', 'LGM', 'DUSt3R', 'MASt3R', 'MV-DUSt3R',
+                            'AttnRend', 'eFreeSplat', 'LGM', '3D-R2N2', 'DUSt3R', 'MASt3R', 'MV-DUSt3R',
                             'MV-DUSt3R+', 'PreF3R', 'Spann3R', 'Fast3R', 'MUSt3R', 'WinT3R',
                             'CUT3R', 'VolSplat', 'G-CUT3R', 'TTT3R', 'Point3R', 'iLRM',
                             'Dens3r', 'MoRE', 'Uni3R', 'Flow3r', 'Gen3R', 'NOVA3R', 'IncVGGT',
@@ -1908,6 +1908,12 @@
             'Geometry Awareness::Explicit Geometric Aggregation::GPOcc',
             'Geometry Awareness::Post Refinement::FreeSplat++',
             'Temporal-aware Models::Online Streaming::Event3R'
+        ]);
+
+        const primaryTaxonomyOverrides = new Map([
+            ['GGN', 'Model Efficiency::Representation Compaction'],
+            ['DUSt3R', 'Geometry Awareness::Pose-Free Reconstruction'],
+            ['PixelGaussian', 'Model Efficiency::Representation Compaction']
         ]);
 
         const mechanismTaxonomyAdditions = [
@@ -2144,6 +2150,21 @@
                 additionKeys.add(membershipKey);
                 category.methods.push(method);
                 assignments.push(category);
+            });
+
+            primaryTaxonomyOverrides.forEach((categoryKey, method) => {
+                const assignments = assignmentsByMethod.get(method);
+                if (!assignments) throw new Error(`Unknown method in primary taxonomy override: ${method}`);
+
+                const primaryIndex = assignments.findIndex((category) =>
+                    `${category.direction}::${category.subsection}` === categoryKey
+                );
+                if (primaryIndex < 0) {
+                    throw new Error(`Primary taxonomy override is not an existing membership: ${method}::${categoryKey}`);
+                }
+                if (primaryIndex > 0) {
+                    assignments.unshift(assignments.splice(primaryIndex, 1)[0]);
+                }
             });
 
             const methods = Array.from(assignmentsByMethod, ([name, categoriesForMethod]) => ({

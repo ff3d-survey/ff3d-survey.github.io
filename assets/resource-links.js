@@ -1,5 +1,6 @@
 window.resourceLinks = {
   "3DRS": "https://visual-ai.github.io/3drs",
+  "3D-R2N2": "https://arxiv.org/abs/1604.00449",
   "4D-LRM": "https://arxiv.org/abs/2506.18890",
   "4DGT": "https://4dgt.github.io/",
   "4DNeX": "https://4dnex.github.io/",
