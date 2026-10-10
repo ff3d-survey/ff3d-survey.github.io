@@ -242,7 +242,6 @@ window.resourceLinks = {
   "SAF3R": "https://arxiv.org/abs/2607.03612",
   "QVGGT": "https://arxiv.org/abs/2605.31124",
   "FF3R": "https://arxiv.org/abs/2604.09862",
-  "Geometric Understanding and Learned Priors": "https://arxiv.org/abs/2512.11508",
   "NeoVerse": "https://arxiv.org/abs/2601.00393",
   "Wild3R": "https://arxiv.org/abs/2606.11894",
   "OmniVGGT": "https://arxiv.org/abs/2511.10560",
